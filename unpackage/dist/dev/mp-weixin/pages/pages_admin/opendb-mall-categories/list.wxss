@@ -1,0 +1,46 @@
+
+/* 确保 scroll-view 占满父容器高度 */
+.list-scroll.data-v-d93cffdd {
+  height: 100%;
+  background-color: #f8f8f8;
+}
+.item-content.data-v-d93cffdd {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+.info.data-v-d93cffdd {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.name.data-v-d93cffdd {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #ff6000;
+  margin-bottom: 8rpx;
+}
+.description.data-v-d93cffdd {
+  font-size: 28rpx;
+  color: #999;
+}
+.error.data-v-d93cffdd {
+  color: #e64340;
+  text-align: center;
+  margin-top: 60rpx;
+}
+.category-list-wrapper.data-v-d93cffdd {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.list-scroll.data-v-d93cffdd {
+  height: 100%;
+}
+.fab-fixed.data-v-d93cffdd {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  z-index: 100;
+}
+

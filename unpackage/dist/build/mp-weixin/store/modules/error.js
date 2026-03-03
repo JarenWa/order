@@ -1,0 +1,1 @@
+"use strict";const t={namespaced:!0,state:{logs:[]},mutations:{ADD_ERROR_LOG:(t,e)=>{t.logs.unshift(e)},CLEAR_ERROR_LOG:t=>{t.logs.splice(0)}},actions:{add({commit:t},e){if(!e.route){const t=getCurrentPages();t.length&&(e.route=t[t.length-1].route)}e.route="/"+(e.route||""),t("ADD_ERROR_LOG",e)},clear({commit:t}){t("CLEAR_ERROR_LOG")}}};exports.error=t;

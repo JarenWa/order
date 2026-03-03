@@ -1,0 +1,56 @@
+
+.detail-container.data-v-8cf0cd0c { padding: 10px; background-color: #f5f5f5; min-height: 100vh;
+}
+.detail-card.data-v-8cf0cd0c { background-color: #fff; border-radius: 8px; padding: 15px;
+}
+.status-section.data-v-8cf0cd0c { text-align: center; margin-bottom: 15px;
+}
+.status.data-v-8cf0cd0c { font-size: 20px; font-weight: bold;
+}
+.status-0.data-v-8cf0cd0c { color: #ff9800;
+}
+.status-1.data-v-8cf0cd0c { color: #2196f3;
+}
+.status-2.data-v-8cf0cd0c { color: #4caf50;
+}
+.status-3.data-v-8cf0cd0c { color: #999;
+}
+.info-section.data-v-8cf0cd0c, .address-section.data-v-8cf0cd0c, .goods-section.data-v-8cf0cd0c, .amount-section.data-v-8cf0cd0c, .extra-section.data-v-8cf0cd0c {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.title.data-v-8cf0cd0c { font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px;
+}
+.item.data-v-8cf0cd0c { display: block; font-size: 14px; color: #666; margin-bottom: 4px;
+}
+.goods-item.data-v-8cf0cd0c { display: flex; align-items: center; margin-bottom: 8px;
+}
+.goods-image.data-v-8cf0cd0c { width: 50px; height: 50px; border-radius: 4px; margin-right: 8px;
+}
+.goods-info.data-v-8cf0cd0c { flex: 1;
+}
+.goods-name.data-v-8cf0cd0c { font-size: 14px;
+}
+.goods-standard.data-v-8cf0cd0c { font-size: 12px; color: #999;
+}
+.goods-price.data-v-8cf0cd0c { font-size: 12px; color: #ff6000;
+}
+.goods-total.data-v-8cf0cd0c { font-weight: bold;
+}
+.amount-row.data-v-8cf0cd0c { display: flex; justify-content: space-between; margin-bottom: 5px;
+}
+.real-pay.data-v-8cf0cd0c { color: #ff6000; font-weight: bold;
+}
+.admin-tags.data-v-8cf0cd0c { display: flex; gap: 8px; margin-top: 8px;
+}
+.tag.data-v-8cf0cd0c { padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #fff;
+}
+.modified.data-v-8cf0cd0c { background-color: #2196f3;
+}
+.cancelled.data-v-8cf0cd0c { background-color: #ff9800;
+}
+.completed.data-v-8cf0cd0c { background-color: #4caf50;
+}
+.back-btn.data-v-8cf0cd0c { margin-top: 20px;
+}

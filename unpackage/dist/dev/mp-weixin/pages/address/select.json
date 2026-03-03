@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "地址选择",
+  "usingComponents": {
+    "unicloud-db": "../../node-modules/@dcloudio/uni-components/lib/unicloud-db/unicloud-db"
+  }
+}

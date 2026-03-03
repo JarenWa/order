@@ -1,0 +1,1 @@
+"use strict";const t={methods:{getParentAll(t,e){(e=this.getParent(`uni${t}`,e))&&(this.rootMenu[t].push(e),this.getParentAll(t,e))},getParent(t,e,n){let r=(e=e.$parent).$options.name;for(;r!==t;){if(!(e=e.$parent))return!1;r=e.$options.name}return e}}};exports.rootParent=t;

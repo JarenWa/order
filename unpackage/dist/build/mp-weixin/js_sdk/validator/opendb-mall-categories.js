@@ -1,0 +1,1 @@
+"use strict";exports.enumConverter={},exports.validator={name:{rules:[{required:!0},{format:"string"}],title:"类别名称",label:"类别名称"},sort:{rules:[{format:"int"}],title:"排序",label:"排序"},description:{rules:[{format:"string"}],title:"类别描述",label:"类别描述"}};

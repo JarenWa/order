@@ -1,0 +1,48 @@
+
+/* 样式保持不变，与您提供的相同 */
+.container.data-v-7934c8ff { padding: 10px; background-color: #f5f5f5; min-height: 100vh;
+}
+.error.data-v-7934c8ff { color: #dd524d; text-align: center; padding: 20px;
+}
+.detail-card.data-v-7934c8ff { margin-bottom: 70px;
+}
+.image-grid.data-v-7934c8ff { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px;
+}
+.grid-image.data-v-7934c8ff { width: calc(33.33% - 6px); aspect-ratio: 1 / 1; border-radius: 8px; background-color: #f0f0f0;
+}
+.no-image.data-v-7934c8ff { width: 100%; text-align: center; color: #999; font-size: 14px; padding: 20px 0;
+}
+.btns.data-v-7934c8ff { position: fixed; bottom: 0; left: 0; right: 0; background-color: #fff; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; gap: 10px; z-index: 100;
+}
+.btns button.data-v-7934c8ff { flex: 1; margin: 0;
+}
+.btn-delete.data-v-7934c8ff { background-color: #dd524d; color: #fff;
+}
+.btn-delete[type='warn'].data-v-7934c8ff { background-color: #dd524d;
+}
+.status-badge.data-v-7934c8ff { display: flex; align-items: center;
+}
+.dot.data-v-7934c8ff { width: 12px; height: 12px; border-radius: 50%; margin-right: 6px;
+}
+.active .dot.data-v-7934c8ff { background-color: #19be6b;
+}
+.inactive .dot.data-v-7934c8ff { background-color: #999;
+}
+.custom-list.data-v-7934c8ff { padding: 0 10px;
+}
+.list-item.data-v-7934c8ff { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;
+}
+.list-item.data-v-7934c8ff:last-child { border-bottom: none;
+}
+.item-label.data-v-7934c8ff { font-size: 16px; color: #333;
+}
+.info-list.data-v-7934c8ff { padding: 10px;
+}
+.info-row.data-v-7934c8ff { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;
+}
+.info-row.data-v-7934c8ff:last-child { border-bottom: none;
+}
+.info-label.data-v-7934c8ff { color: #666; font-size: 14px;
+}
+.info-value.data-v-7934c8ff { color: #333; font-size: 14px;
+}

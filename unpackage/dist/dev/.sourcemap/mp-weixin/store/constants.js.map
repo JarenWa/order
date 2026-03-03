@@ -1,0 +1,1 @@
+{"version":3,"file":"constants.js","sources":["store/constants.js"],"sourcesContent":["/** uni-admin 缓存键名 */\r\nexport const uniAdminCacheKey = {\r\n\ttheme: \"uni-admin-theme\", // 主题\r\n\r\n}\r\n"],"names":[],"mappings":";AACY,MAAC,mBAAmB;AAAA,EAC/B,OAAO;AAAA;AAER;;"}

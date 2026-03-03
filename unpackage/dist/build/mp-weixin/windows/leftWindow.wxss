@@ -1,0 +1,1 @@
+.sidebar{position:fixed;width:240px;height:calc(100vh - (var(--top-window-height)));box-sizing:border-box;border-right:1px solid #ebebeb;background-color:#fff;padding-bottom:10px}.title{margin-left:5px}

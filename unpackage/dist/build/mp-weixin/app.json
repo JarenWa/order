@@ -1,0 +1,87 @@
+{
+  "pages": [
+    "pages/index/index",
+    "uni_modules/uni-id-pages/pages/userinfo/userinfo",
+    "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
+    "uni_modules/uni-id-pages/pages/login/login-withpwd",
+    "uni_modules/uni-id-pages/pages/login/login-smscode",
+    "uni_modules/uni-id-pages/pages/register/register",
+    "uni_modules/uni-id-pages/pages/register/register-admin",
+    "uni_modules/uni-id-pages/pages/register/register-by-email",
+    "uni_modules/uni-id-pages/pages/retrieve/retrieve",
+    "uni_modules/uni-id-pages/pages/retrieve/retrieve-by-email",
+    "uni_modules/uni-id-pages/pages/userinfo/bind-mobile/bind-mobile",
+    "uni_modules/uni-id-pages/pages/userinfo/change_pwd/change_pwd",
+    "uni_modules/uni-id-pages/pages/userinfo/deactivate/deactivate",
+    "uni_modules/uni-id-pages/pages/userinfo/realname-verify/realname-verify",
+    "uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd",
+    "pages/goods/list",
+    "pages/goods/detail",
+    "pages/cart/index",
+    "pages/order/list",
+    "pages/order/detail",
+    "pages/order/edit",
+    "pages/order/confirm",
+    "pages/user/index",
+    "pages/user/info",
+    "pages/error/404",
+    "pages/address/add",
+    "pages/address/select",
+    "pages/address/edit"
+  ],
+  "subPackages": [
+    {
+      "root": "pages/pages_admin",
+      "pages": [
+        "index/index",
+        "opendb-mall-categories/list",
+        "opendb-mall-categories/add",
+        "opendb-mall-categories/edit",
+        "opendb-mall-categories/detail",
+        "opendb-mall-goods/list",
+        "opendb-mall-goods/add",
+        "opendb-mall-goods/edit",
+        "opendb-mall-goods/detail",
+        "uni-pay-orders/list",
+        "uni-pay-orders/add",
+        "uni-pay-orders/edit",
+        "uni-pay-orders/detail"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "优速订货",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#007AFF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/goods/list",
+        "text": "商品"
+      },
+      {
+        "pagePath": "pages/cart/index",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/user/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "entryPagePath": "pages/index/index",
+  "networkTimeout": {
+    "uploadFile": 1200000
+  },
+  "usingComponents": {}
+}

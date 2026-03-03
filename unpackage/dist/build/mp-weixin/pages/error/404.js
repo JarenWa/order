@@ -1,0 +1,1 @@
+"use strict";const r=require("../../common/vendor.js"),e={data:()=>({errMsg:""}),onLoad(r){this.errMsg=r.errMsg||""}};if(!Array){r.resolveComponent("fix-window")()}Math;const s=r._export_sfc(e,[["render",function(e,s,o,t,n,a){return r.e({a:n.errMsg},n.errMsg?{b:r.t(n.errMsg)}:{})}],["__scopeId","data-v-44bfa533"]]);wx.createPage(s);

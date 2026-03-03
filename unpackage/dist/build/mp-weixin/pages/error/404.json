@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "页面不存在",
+  "usingComponents": {
+    "fix-window": "../../components/fix-window/fix-window"
+  }
+}

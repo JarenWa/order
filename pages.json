@@ -1,0 +1,247 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/userinfo",
+      "style": { "navigationBarTitleText": "个人中心" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
+      "style": { "navigationBarTitleText": "登录" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/login/login-withpwd",
+      "style": { "navigationBarTitleText": "密码登录" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/login/login-smscode",
+      "style": { "navigationBarTitleText": "短信验证码登录" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/register/register",
+      "style": { "navigationBarTitleText": "注册" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/register/register-admin",
+      "style": { "navigationBarTitleText": "管理员注册" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/register/register-by-email",
+      "style": { "navigationBarTitleText": "邮箱注册" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/retrieve/retrieve",
+      "style": { "navigationBarTitleText": "找回密码" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/retrieve/retrieve-by-email",
+      "style": { "navigationBarTitleText": "邮箱找回密码" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/bind-mobile/bind-mobile",
+      "style": { "navigationBarTitleText": "绑定手机号" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/change_pwd/change_pwd",
+      "style": { "navigationBarTitleText": "修改密码" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/deactivate/deactivate",
+      "style": { "navigationBarTitleText": "注销账号" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/realname-verify/realname-verify",
+      "style": { "navigationBarTitleText": "实名认证" }
+    },
+    {
+      "path": "uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd",
+      "style": { "navigationBarTitleText": "设置密码" }
+    },
+    {
+      "path": "pages/goods/list",
+      "style": {
+        "navigationBarTitleText": "商品列表"
+      }
+    },
+    {
+      "path": "pages/goods/detail",
+      "style": {
+        "navigationBarTitleText": "商品详情"
+      }
+    },
+    {
+      "path": "pages/cart/index",
+      "style": {
+        "navigationBarTitleText": "购物车"
+      }
+    },
+    {
+      "path": "pages/order/list",
+      "style": {
+        "navigationBarTitleText": "我的订单"
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/order/edit",
+      "style": { "navigationBarTitleText": "修改订单" }
+    },
+    {
+      "path": "pages/order/confirm",
+      "style": {
+        "navigationBarTitleText": "订单确认"
+      }
+    },
+    {
+      "path": "pages/user/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/user/info",
+      "style": {
+        "navigationBarTitleText": "个人资料"
+      }
+    },
+    {
+      "path": "pages/error/404",
+      "style": {
+        "navigationBarTitleText": "页面不存在"
+      }
+    },
+    {
+      "path": "pages/address/add",
+      "style": { "navigationBarTitleText": "新增地址" }
+    },
+    {
+      "path": "pages/address/select",
+      "style": { "navigationBarTitleText": "地址选择" }
+    },
+    {
+      "path": "pages/address/edit",
+      "style": { "navigationBarTitleText": "编辑地址" }
+    }
+  ],
+  "entryPagePath": "pages/index/index",
+  "subPackages": [
+    {
+      "root": "pages/pages_admin",
+      "pages": [
+        {
+          "path": "index/index",
+          "style": { "navigationBarTitleText": "后台管理" }
+        },
+        {
+          "path": "opendb-mall-categories/list",
+          "style": { "navigationBarTitleText": "分类管理" }
+        },
+        {
+          "path": "opendb-mall-categories/add",
+          "style": { "navigationBarTitleText": "新增分类" }
+        },
+        {
+          "path": "opendb-mall-categories/edit",
+          "style": { "navigationBarTitleText": "编辑分类" }
+        },
+        {
+          "path": "opendb-mall-categories/detail",
+          "style": { "navigationBarTitleText": "分类详情" }
+        },
+        {
+          "path": "opendb-mall-goods/list",
+          "style": { "navigationBarTitleText": "商品管理" }
+        },
+        {
+          "path": "opendb-mall-goods/add",
+          "style": { "navigationBarTitleText": "新增商品" }
+        },
+        {
+          "path": "opendb-mall-goods/edit",
+          "style": { "navigationBarTitleText": "编辑商品" }
+        },
+        {
+          "path": "opendb-mall-goods/detail",
+          "style": { "navigationBarTitleText": "商品详情" }
+        },
+        {
+          "path": "uni-pay-orders/list",
+          "style": { "navigationBarTitleText": "订单管理" }
+        },
+        {
+          "path": "uni-pay-orders/add",
+          "style": { "navigationBarTitleText": "新增订单" }
+        },
+        {
+          "path": "uni-pay-orders/edit",
+          "style": { "navigationBarTitleText": "编辑订单" }
+        },
+        {
+          "path": "uni-pay-orders/detail",
+          "style": { "navigationBarTitleText": "订单详情" }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "优速订货",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8",
+    "h5": {
+      "titleNView": false
+    }
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#007AFF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/goods/list",
+        "text": "商品"
+      },
+      {
+        "pagePath": "pages/cart/index",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/user/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "uniIdRouter": {
+    "loginPage": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
+    "needLogin": [
+      "^pages/cart/.*",
+      "^pages/order/.*",
+      "^pages/user/info$",
+      "^pages/user/change_pwd$",
+      "^pages/address/.*",
+      "^pages_admin/.*"
+    ],
+    "resToLogin": true
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+
+.order-list-scroll.data-v-08129ca7 {
+  height: 100%;
+  background-color: #f5f5f5;
+}
+.order-list.data-v-08129ca7 { padding: 10px;
+}
+.order-item.data-v-08129ca7 { background-color: #fff; border-radius: 8px; padding: 12px; margin-bottom: 10px;
+}
+.order-header.data-v-08129ca7 { display: flex; justify-content: space-between; margin-bottom: 6px;
+}
+.order-no.data-v-08129ca7 { font-size: 12px; color: #999;
+}
+.order-status.data-v-08129ca7 { font-size: 12px; font-weight: bold;
+}
+.status-0.data-v-08129ca7 { color: #ff9800;
+}
+.status-1.data-v-08129ca7 { color: #2196f3;
+}
+.status-2.data-v-08129ca7 { color: #4caf50;
+}
+.status-3.data-v-08129ca7 { color: #999;
+}
+.order-pre.data-v-08129ca7 { font-size: 12px; font-weight: bold;color: #55aaff;
+}
+.address-info.data-v-08129ca7 { font-size: 13px; color: #666; margin-bottom: 8px;
+}
+.address-info text.data-v-08129ca7 { display: block;
+}
+.goods-list.data-v-08129ca7 { margin-bottom: 8px;
+}
+.goods-item.data-v-08129ca7 { display: flex; margin-bottom: 8px;
+}
+.goods-image.data-v-08129ca7 { width: 50px; height: 50px; border-radius: 4px; margin-right: 8px;
+}
+.goods-info.data-v-08129ca7 { flex: 1;
+}
+.goods-name.data-v-08129ca7 { font-size: 14px;
+}
+.goods-standard.data-v-08129ca7 { font-size: 12px; color: #999;
+}
+.goods-price.data-v-08129ca7 { font-size: 12px; color: #ff6000;
+}
+.order-footer.data-v-08129ca7 { display: flex; justify-content: space-between; margin-top: 8px; font-size: 14px;
+}
+.total.data-v-08129ca7 { color: #333;
+}
+.score.data-v-08129ca7 { color: #666;
+}
+.action-buttons.data-v-08129ca7 { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;
+}
+.action-btn.data-v-08129ca7 { font-size: 12px; padding: 4px 12px; border-radius: 4px; margin: 0;
+}
+.edit.data-v-08129ca7 { background-color: #2196f3; color: #fff;
+}
+.cancel.data-v-08129ca7 { background-color: #ff9800; color: #fff;
+}
+.ship.data-v-08129ca7 { background-color: #4caf50; color: #fff;
+}
+.complete.data-v-08129ca7 { background-color: #9c27b0; color: #fff;
+}
+.error.data-v-08129ca7, .loading.data-v-08129ca7, .empty.data-v-08129ca7 { text-align: center; padding: 20px; color: #999;
+}
