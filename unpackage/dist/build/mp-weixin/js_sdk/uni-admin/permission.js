@@ -1,1 +1,0 @@
-"use strict";exports.initPermission=function(e){e.config.globalProperties.$hasPermission=function(e){const i=this.$uniIdPagesStore.store.userInfo.permission||[];return(this.$uniIdPagesStore.store.userInfo.role||[]).indexOf("admin")>-1||i.indexOf(e)>-1},e.config.globalProperties.$hasRole=function(e){return(this.$uniIdPagesStore.store.userInfo.role||[]).indexOf(e)>-1}};

@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "后台管理",
-  "usingComponents": {
-    "categories-list": "../opendb-mall-categories/list",
-    "goods-list": "../opendb-mall-goods/list",
-    "orders-list": "../uni-pay-orders/list"
-  }
-}

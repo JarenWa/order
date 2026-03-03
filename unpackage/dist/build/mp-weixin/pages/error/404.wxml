@@ -1,1 +1,0 @@
-<view class="error-page data-v-44bfa533"><view class="error-container data-v-44bfa533"><view class="error-code data-v-44bfa533">404</view><view class="error-title data-v-44bfa533">页面未找到</view><view wx:if="{{a}}" class="error-msg data-v-44bfa533">{{b}}</view></view><fix-window class="data-v-44bfa533" u-i="44bfa533-0" bind:__l="__l"/></view>

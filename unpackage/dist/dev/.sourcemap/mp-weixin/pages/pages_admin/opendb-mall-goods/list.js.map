@@ -1,1 +1,0 @@
-{"version":3,"file":"list.js","sources":["../../Tools/HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXNccGFnZXNfYWRtaW5cb3BlbmRiLW1hbGwtZ29vZHNcbGlzdC52dWU"],"sourcesContent":["import MiniProgramPage from 'D:/order/order-admin-mp/pages/pages_admin/opendb-mall-goods/list.vue'\nwx.createPage(MiniProgramPage)"],"names":["MiniProgramPage"],"mappings":";;AACA,GAAG,WAAWA,KAAe,eAAA;"}

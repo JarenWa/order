@@ -1,1 +1,0 @@
-"use strict";const r=require("../../common/vendor.js"),e=require("../../admin.config.js");exports.initInterceptor=function(){let n=!1;r.index.addInterceptor("navigateTo",{invoke({url:r}){n=!(!r||!r.startsWith(e.config.error.url))},fail:({errMsg:i})=>{-1!==i.indexOf("is not found")&&(n||r.index.navigateTo({url:e.config.error.url+"?errMsg="+i}))}})};

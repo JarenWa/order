@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "购物车",
-  "usingComponents": {
-    "uni-number-box": "../../uni_modules/uni-number-box/components/uni-number-box/uni-number-box",
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
-    "unicloud-db": "../../node-modules/@dcloudio/uni-components/lib/unicloud-db/unicloud-db"
-  }
-}
