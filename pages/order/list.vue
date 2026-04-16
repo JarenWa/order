@@ -16,11 +16,11 @@
 			<text class="order-pre">{{ getOrderIsPreText(item.is_pre_order) }}</text>
 			  
             <text class="order-no">订单号：{{ item.order_no }}</text>
-            <text class="order-status" :class="'status-' + item.status">{{ getStatusText(item.status) }}</text>
+            <text class="order-status" :class="'status-' + item.status">{{ getStatusText(item) }}</text>
           </view>
+		  <view class="order-date">创建时间：{{formatDate(item.create_date)}}</view>
           <view class="goods-list" @click="goDetail(item._id)">
             <view v-for="(good, index) in item.goods_list" :key="index" class="goods-item">
-              <image class="goods-image" :src="good.image || '/static/default-goods.png'" mode="aspectFill"></image>
               <view class="goods-info">
                 <text class="goods-name">{{ good.name }}</text>
                 <text class="goods-standard">{{ good.standard }}</text>
@@ -82,7 +82,30 @@ export default {
     }
   },
   methods: {
-    getStatusText(status) {
+	  formatDate(timestamp) {
+	    if (!timestamp) return '-'
+	    const date = new Date(timestamp)
+	    const year = date.getFullYear()
+	    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+	    const day = date.getDate().toString().padStart(2, '0')
+	    const hours = date.getHours().toString().padStart(2, '0')
+	    const minutes = date.getMinutes().toString().padStart(2, '0')
+	    return `${year}-${month}-${day} ${hours}:${minutes}`
+	  },
+    getStatusText(item) {
+		const status = item.status;
+		// 状态3（已取消）且 admin_cancelled 为 true 时，显示“后台已取消”
+		if (status === 3 && item.admin_cancelled === true) {
+		  return '(后台)已取消';
+		}
+		// 状态2（已收货）且 admin_completed 为 true 时，显示“后台已收货”
+		if (status === 2 && item.admin_completed === true) {
+		  return '(后台)已收货';
+		}
+		// 状态0（待发货）且 admin_modified 为 true 时，显示“后台修改 已收货”
+		if (status === 0 && item.admin_modified === true) {
+		  return '(后台修改)待发货';
+		}
       const map = { 0: '待发货', 1: '配送中', 2: '已收货', 3: '已取消' };
       return map[status] || '未知';
     },
@@ -224,6 +247,7 @@ export default {
 .status-3 { color: #999; }
 .order-pre { font-size: 12px; font-weight: bold;color: #55aaff; }
 
+.order-date{font-size: 12px; color: #999;}
 .goods-list { margin-bottom: 8px; cursor: pointer; }
 .goods-item { display: flex; margin-bottom: 8px; }
 .goods-image { width: 50px; height: 50px; border-radius: 4px; margin-right: 8px; }

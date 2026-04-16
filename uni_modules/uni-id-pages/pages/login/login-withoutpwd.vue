@@ -122,7 +122,18 @@
 
 				if (this.type === 'weixinMobile' && !e.detail?.code) return
 
-				this.$refs.uniFabLogin.login_before(this.type, true, options)
+				// 协议检查：如果需要同意协议且未勾选，则弹出弹窗
+				if (this.needAgreements && !this.$refs.agreements.isAgreed) {
+					return this.$refs.agreements.popup(() => {
+						this.$refs.uniFabLogin.login_before(this.type, true, options).then(e => {
+							this.loginSuccess(e)
+						})
+					})
+				}
+
+				this.$refs.uniFabLogin.login_before(this.type, true, options).then(e => {
+					this.loginSuccess(e)
+				})
 			},
 			toSmsPage() {
 				if (!this.isPhone) {
@@ -133,7 +144,7 @@
 						duration: 3000
 					});
 				}
-				if (this.needAgreements && !this.agree) {
+				if (this.needAgreements && !this.$refs.agreements.isAgreed) {
 					return this.$refs.agreements.popup(this.toSmsPage)
 				}
 				// 发送验证吗

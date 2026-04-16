@@ -33,6 +33,8 @@
 		  
           <view class="item-info">
             <text class="item-name">{{ item.goodsInfo?.name || '-' }}</text>
+			
+			
 			<text class="item-standard">{{ item.goodsInfo?.standard || '-' }}</text>
             <text class="item-price">¥{{ (item.goodsInfo?.goods_price / 100).toFixed(2) || '0.00' }}</text>
           </view>
@@ -92,15 +94,24 @@ export default {
     if (!this.userInfo || !this.userInfo._id) {
       uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
     }
+	// 每次页面显示时刷新（用户从其他页面返回购物车）
+	    if (this.userInfo && this.userInfo._id) {
+	      this.refreshCart();
+	    }
 	uni.$on('cartUpdated', () => {
 	    this.$refs.udb && this.$refs.udb.loadData({ clear: true });
 	  });
 	  
   },
   onUnload() {
-    uni.$off('cartUpdated');
+    uni.$off('cartUpdated', this.refreshCart);
   },
   methods: {
+	  refreshCart() {
+	        if (this.$refs.udb) {
+	          this.$refs.udb.loadData({ clear: true });
+	        }
+	      },
 	  // 商品详情
 	  goGoodsDetail(id) {
 	    uni.navigateTo({ url: `/pages/goods/detail?id=${id}` });
@@ -255,6 +266,7 @@ export default {
   font-size: 14px;
   color: #333;
   margin-bottom: 4px;
+  font-weight: bold;   /* 加粗 */
 }
 .item-standard {
   font-size: 12px;

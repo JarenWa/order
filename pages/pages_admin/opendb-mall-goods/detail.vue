@@ -9,6 +9,9 @@
           <uni-list-item title="商品名称" :right-text="data.name" />
           <uni-list-item title="库存数量" :right-text="String(data.remain_count)" />
           <uni-list-item title="价格(元)" :right-text="String((data.goods_price / 100).toFixed(2) )" />
+		  <uni-list-item title="生产日期" :right-text="data.production_date" />
+		  <uni-list-item title="保质期(月)" :right-text="data.shelf_life_months" />
+		  <uni-list-item title="库存" :right-text="data.remain_count" />
           <uni-list-item title="商品简介" :right-text="data.goods_desc || '无'" />
           <uni-list-item title="商品规格" :right-text="data.standard || '无'" />
           <!-- 修改这里：使用 getCategoryName 显示分类名称 -->

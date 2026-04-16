@@ -22,68 +22,66 @@
         <text class="divider-text">或</text>
       </view>
 
-      <!-- 密码登录表单（管理员使用） -->
-      <view class="form" v-if="showPwdLogin">
+      <!-- 密码登录表单 -->
+      <view class="form">
         <uni-forms ref="form" :modelValue="formData" :rules="rules">
-          <uni-forms-item name="username" label="账号" required>
+          <uni-forms-item name="username" required>
             <uni-easyinput
-              type="text"
               v-model="formData.username"
-              placeholder="请输入用户名/手机号/邮箱"
+              placeholder="用户名"
             />
           </uni-forms-item>
-          <uni-forms-item name="password" label="密码" required>
+          <uni-forms-item name="password" required>
             <uni-easyinput
-              type="password"
               v-model="formData.password"
-              placeholder="请输入密码"
+              placeholder="密码"
+              type="password"
             />
           </uni-forms-item>
         </uni-forms>
         <button type="primary" class="login-btn" @click="handlePwdLogin" :loading="pwdLoading">
           登录
         </button>
-        <view class="register-link" @click="goRegister">还没有账号？立即注册</view>
+        <view class="register-link" @click="goRegister">没有账号？立即注册</view>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import { store, mutations } from '@/uni_modules/uni-id-pages/common/store.js'
+
+const db = uniCloud.database()
+
 export default {
   data() {
     return {
       weixinLoading: false,
       pwdLoading: false,
-      showPwdLogin: true,
       formData: {
         username: '',
         password: ''
       },
       rules: {
         username: { rules: [{ required: true, errorMessage: '请输入账号' }] },
-        password: {
-          rules: [
-            { required: true, errorMessage: '请输入密码' },
-            { minLength: 6, maxLength: 20, errorMessage: '密码长度在6-20位之间' }
-          ]
-        }
+        password: { rules: [{ required: true, errorMessage: '请输入密码' }] }
       }
     }
   },
   onLoad() {
+    // 如果已登录，直接跳转首页
     if (uni.getStorageSync('uni_id_token')) {
-      uni.switchTab({ url: '/pages/index/index' });
+      uni.switchTab({ url: '/pages/index/index' })
     }
   },
   methods: {
     // 微信登录
     async weixinLogin(e) {
       if (!e.detail.userInfo) {
-        uni.showToast({ title: '您拒绝了授权', icon: 'none' });
-        return;
+        uni.showToast({ title: '您拒绝了授权', icon: 'none' })
+        return
       }
-      this.weixinLoading = true;
+      this.weixinLoading = true
       try {
         // 1. 获取 code
         const loginRes = await new Promise((resolve, reject) => {
@@ -91,68 +89,72 @@ export default {
             provider: 'weixin',
             success: resolve,
             fail: reject
-          });
-        });
-        const code = loginRes.code;
+          })
+        })
+        const code = loginRes.code
 
         // 2. 调用 uni-id-co 的微信登录接口
-        const uniIdCo = uniCloud.importObject('uni-id-co');
-        const res = await uniIdCo.loginByWeixin({ code });
+        const uniIdCo = uniCloud.importObject('uni-id-co')
+        const res = await uniIdCo.loginByWeixin({ code })
 
         if (res.code === 0) {
           // 保存 token 和用户信息
-          uni.setStorageSync('uni_id_token', res.token);
-          uni.setStorageSync('userInfo', res.userInfo);
-          uni.setStorageSync('role', res.userInfo.role || []);
+          uni.setStorageSync('uni_id_token', res.token)
+          uni.setStorageSync('userInfo', res.userInfo)
+          // 同步 store
+          mutations.setUserInfo(res.userInfo)
 
-          // 判断手机号是否已验证（mobile_confirmed === 1）
-          const hasVerifiedMobile = res.userInfo.mobile_confirmed === 1;
-          if (hasVerifiedMobile) {
-            // 已绑定并验证手机号，跳转首页
-            uni.switchTab({ url: '/pages/index/index' });
+          // 判断手机号是否为空
+          if (!res.userInfo || !res.userInfo.mobile) {
+            // 未绑定，跳转到绑定手机号页面
+            uni.navigateTo({
+              url: '/uni_modules/uni-id-pages/pages/userinfo/bind-mobile/bind-mobile'
+            })
           } else {
-            // 未绑定手机号或未验证，跳转到绑定手机号页面
-            uni.navigateTo({ url: '/pages/user/bind-mobile' });
+            // 已绑定，跳转到首页
+            uni.switchTab({ url: '/pages/index/index' })
           }
         } else {
-          uni.showModal({ content: res.message || '微信登录失败', showCancel: false });
+          uni.showModal({ content: res.message || '微信登录失败', showCancel: false })
         }
       } catch (err) {
-        console.error('微信登录失败', err);
-        uni.showModal({ content: err.message || '微信登录失败', showCancel: false });
+        console.error('微信登录失败', err)
+        uni.showModal({ content: err.message || '微信登录失败', showCancel: false })
       } finally {
-        this.weixinLoading = false;
+        this.weixinLoading = false
       }
     },
 
-    // 密码登录（管理员）
+    // 密码登录
     async handlePwdLogin() {
-      await this.$refs.form.validate();
-      this.pwdLoading = true;
+      await this.$refs.form.validate()
+      this.pwdLoading = true
       try {
-        const uniIdCo = uniCloud.importObject('uni-id-co');
+        const uniIdCo = uniCloud.importObject('uni-id-co')
         const res = await uniIdCo.login({
           username: this.formData.username,
           password: this.formData.password
-        });
+        })
         if (res.code === 0) {
-          uni.setStorageSync('uni_id_token', res.token);
-          uni.setStorageSync('userInfo', res.userInfo);
-          uni.setStorageSync('role', res.userInfo.role || []);
-          uni.switchTab({ url: '/pages/index/index' });
+          uni.setStorageSync('uni_id_token', res.token)
+          uni.setStorageSync('userInfo', res.userInfo)
+          mutations.setUserInfo(res.userInfo)
+          // 密码登录的用户通常已有手机号，直接跳转首页
+          uni.switchTab({ url: '/pages/index/index' })
         } else {
-          uni.showModal({ content: res.message || '登录失败', showCancel: false });
+          uni.showModal({ content: res.message || '登录失败', showCancel: false })
         }
       } catch (err) {
-        console.error('密码登录失败', err);
-        uni.showModal({ content: err.message || '登录失败', showCancel: false });
+        console.error('密码登录失败', err)
+        uni.showModal({ content: err.message || '登录失败', showCancel: false })
       } finally {
-        this.pwdLoading = false;
+        this.pwdLoading = false
       }
     },
 
+    // 跳转到注册页面（如需）
     goRegister() {
-      uni.navigateTo({ url: '/pages/user/register' });
+      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/register/register' })
     }
   }
 }

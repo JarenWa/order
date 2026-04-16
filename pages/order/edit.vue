@@ -12,6 +12,34 @@
       <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
     </view>
 
+    <!-- 商品列表编辑区 -->
+    <uni-card title="商品明细" :is-shadow="true" margin="10px 0">
+      <view v-for="(item, index) in goodsList" :key="index" class="goods-item">
+        <view class="goods-header">
+          <text class="goods-name">{{ item.name }}</text>
+          <text class="goods-standard">{{ item.standard }}</text>
+        </view>
+        <view class="goods-edit">
+          <view class="edit-item">
+            <text class="label">单价：¥{{ (item.price / 100).toFixed(2) }}</text>
+            <text class="label">原数量：{{ item.originalCount }}</text>
+          </view>
+          <view class="edit-item">
+            <text class="label">新数量</text>
+            <uni-easyinput
+              v-model="item.count"
+              type="number"
+              placeholder="数量"
+              :inputBorder="false"
+              class="count-input"
+              @blur="checkStock(item)"
+            />
+          </view>
+          <button class="delete-btn" size="mini" type="warn" @click="deleteItem(index)">删除</button>
+        </view>
+      </view>
+    </uni-card>
+
     <!-- 备注 -->
     <view class="remark-section">
       <text class="section-label">备注</text>
@@ -34,6 +62,7 @@ export default {
       originalOrder: null,
       selectedAddress: null,
       remark: '',
+      goodsList: [], // { good_id, name, standard, price, originalCount, count }
     };
   },
   onLoad(options) {
@@ -46,6 +75,7 @@ export default {
     this.loadOrderDetail();
   },
   methods: {
+    // 加载订单详情
     async loadOrderDetail() {
       uni.showLoading({ title: '加载中...' });
       try {
@@ -70,7 +100,15 @@ export default {
         }
         this.originalOrder = order;
         this.remark = order.remark || '';
-        // 这里可以尝试根据订单中的地址信息匹配已有的地址条目，为简化，不预选地址
+        // 初始化商品列表
+        this.goodsList = order.goods_list.map(item => ({
+          good_id: item.good_id,
+          name: item.name,
+          standard: item.standard,
+          price: item.price,
+          originalCount: item.count,
+          count: item.count,
+        }));
       } catch (err) {
         console.error('加载订单失败', err);
         uni.showToast({ title: '加载失败', icon: 'none' });
@@ -92,26 +130,67 @@ export default {
         }
       });
     },
+    // 前端粗略检查
+    checkStock(item) {
+      if (item.count < 0) item.count = 0;
+    },
+    // 删除商品项（将数量设为0并移除）
+    deleteItem(index) {
+      uni.showModal({
+        title: '提示',
+        content: '确定要从订单中删除该商品吗？',
+        success: (res) => {
+          if (res.confirm) {
+            this.goodsList.splice(index, 1);
+          }
+        }
+      });
+    },
+    // 提交修改
     async submitEdit() {
       if (!this.selectedAddress) {
         uni.showToast({ title: '请选择收货地址', icon: 'none' });
         return;
       }
+      // 过滤掉数量为0的商品
+      const finalGoods = this.goodsList.filter(item => item.count > 0);
+      if (finalGoods.length === 0) {
+        uni.showToast({ title: '订单至少保留一个商品', icon: 'none' });
+        return;
+      }
+
       uni.showLoading({ title: '保存中...' });
       try {
-        const updateData = {
-          consignee: this.selectedAddress.name,
-          mobile: this.selectedAddress.mobile,
-          address: this.selectedAddress.formatted_address || this.formatAddress(this.selectedAddress),
-          remark: this.remark,
-          update_date: Date.now()
-        };
-        await db.collection('uni-pay-orders').doc(this.orderId).update(updateData);
-        uni.hideLoading();
-        uni.showToast({ title: '修改成功', icon: 'success' });
-        const eventChannel = this.getOpenerEventChannel();
-        eventChannel.emit('refreshData');
-        setTimeout(() => uni.navigateBack(), 500);
+        const res = await uniCloud.callFunction({
+          name: 'userUpdateOrder',
+          data: {
+            orderId: this.orderId,
+            address: {
+              consignee: this.selectedAddress.name,
+              mobile: this.selectedAddress.mobile,
+              address: this.selectedAddress.formatted_address || this.formatAddress(this.selectedAddress),
+            },
+            remark: this.remark,
+            goodsList: finalGoods.map(item => ({
+              good_id: item.good_id,
+              name: item.name,
+              standard: item.standard,
+              price: item.price,
+              count: item.count,
+            })),
+          }
+        });
+
+        if (res.result.code === 0) {
+          uni.hideLoading();
+          uni.showToast({ title: '修改成功', icon: 'success' });
+          const eventChannel = this.getOpenerEventChannel();
+          eventChannel.emit('refreshData');
+          setTimeout(() => uni.navigateBack(), 500);
+        } else {
+          uni.hideLoading();
+          uni.showModal({ content: res.result.message, showCancel: false });
+        }
       } catch (err) {
         uni.hideLoading();
         console.error('修改订单失败', err);
@@ -124,7 +203,7 @@ export default {
 
 <style scoped>
 .edit-order-container {
-  padding: 20px;
+  padding: 10px;
   background-color: #f5f5f5;
   min-height: 100vh;
 }
@@ -138,7 +217,7 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   padding: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -164,6 +243,47 @@ export default {
 .address-empty {
   color: #999;
 }
+.goods-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #eee;
+}
+.goods-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.goods-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+.goods-standard {
+  font-size: 14px;
+  color: #666;
+}
+.goods-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.edit-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.label {
+  font-size: 14px;
+  color: #999;
+}
+.count-input {
+  width: 100px;
+}
+.delete-btn {
+  margin-left: auto;
+}
 .remark-section {
   background-color: #fff;
   border-radius: 8px;
@@ -175,7 +295,7 @@ textarea {
   min-height: 80px;
   border: 1px solid #ddd;
   border-radius: 6px;
- padding: 8px;
+  padding: 8px;
   font-size: 14px;
   margin-top: 8px;
   box-sizing: border-box;

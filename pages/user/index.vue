@@ -2,10 +2,10 @@
   <view class="user-container">
     <!-- 头部用户信息区域 -->
     <view class="user-header" @click="goUserInfo">
-      <image class="avatar" :src="userInfo.avatarFile || '/static/default-avatar.png'"></image>
+      <image class="avatar" :src="avatarUrl" mode="aspectFill"></image>
       <view class="user-info">
         <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
-        <text class="phone">{{ userInfo.mobile || '未绑定手机号' }}</text>
+        <text class="phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
       </view>
       <uni-icons type="arrowright" size="20" color="#999"></uni-icons>
     </view>
@@ -53,7 +53,7 @@
       <!-- 配送中卡片 -->
       <view class="order-status-card" style="background-color:#e3f2fd;" @click="goOrderList(1)">
         <view class="card-left">
-          <uni-icons type="car" size="24" color="#2196f3"></uni-icons>
+          <uni-icons type="upload" size="24" color="#2196f3"></uni-icons>
         </view>
         <view class="card-center">
           <text class="status-label">配送中</text>
@@ -91,16 +91,30 @@
     </view>
 
     <!-- 自定义列表项 -->
-    <view class="custom-list-item" @click="goUserInfo">
+    <view class="custom-list-item" @click="goInfo">
       <view class="item-left">
-        <text>个人信息</text>
+        <text>个人信息（含收货地址管理）</text>
       </view>
       <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
     </view>
+	
+	<view class="custom-list-item" @click="goExchange">
+	  <view class="item-left">
+	    <text>积分兑换</text>
+	  </view>
+	  <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
+	</view>
+	
+	<view class="custom-list-item" @click="goExchangeRecords">
+	  <view class="item-left">
+	    <text>兑换记录</text>
+	  </view>
+	  <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
+	</view>
 
     <view v-if="isAdmin" class="custom-list-item" @click="goAdminPanel">
       <view class="item-left">
-        <text>管理后台</text>
+        <text>管理后台（管理员后台操作入口）</text>
       </view>
       <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
     </view>
@@ -141,7 +155,12 @@ export default {
       const role = this.userInfo?.role || [];
       console.log('当前角色:', role);
       return Array.isArray(role) ? role.includes('admin') : role === 'admin';
-    }
+    },
+	avatarUrl() {
+	    const user = this.userInfo || {};
+	    // 兼容 avatar_file 和 avatarFile 两种命名
+	    return user.avatar_file?.url || user.avatarFile?.url ;
+	  }
   },
   onShow() {
     if (!this.checkLogin()) return;
@@ -180,8 +199,21 @@ export default {
     },
     goUserInfo() {
       if (!this.checkLogin()) return;
-      uni.navigateTo({ url: '../user/info' });
+      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo' });
     },
+	goInfo() {
+	  if (!this.checkLogin()) return;
+	  uni.navigateTo({ url: '../user/info' });
+	},
+	goExchange() {
+		if (!this.checkLogin()) return;
+		uni.navigateTo({ url: '../exchange/exchange' });
+	},
+		
+	goExchangeRecords() {
+		if (!this.checkLogin()) return;
+		uni.navigateTo({ url: '../exchange/records' });
+	},
     goOrderList(status) {
       if (!this.checkLogin()) return;
       let url = '/pages/order/list';
@@ -289,7 +321,7 @@ export default {
   display: flex;
   background-color: #fff;
   padding: 15px 20px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   justify-content: space-around;
 }
 .score-item {
@@ -310,12 +342,13 @@ export default {
 
 .order-status-section {
   background-color: #fff;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 6px;
+  margin-bottom: 6px;
 }
 .order-status-card {
   display: flex;
   align-items: center;
+  height: 16px;      
   padding: 12px 10px;
   margin-bottom: 8px;
   border-radius: 8px;

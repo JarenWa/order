@@ -25,7 +25,7 @@
         <view class="goods-section">
           <text class="section-title">商品清单</text>
           <view v-for="(good, index) in data.goods_list" :key="index" class="goods-item">
-            <image class="goods-image" :src="good.image || '/static/default-goods.png'" mode="aspectFill"></image>
+            <image class="goods-image" :src="good.image || '/static/tab/goods-default.png'" mode="aspectFill"></image>
             <view class="goods-info">
               <text class="goods-name">{{ good.name }}</text>
               <text class="goods-standard">{{ good.standard }}</text>

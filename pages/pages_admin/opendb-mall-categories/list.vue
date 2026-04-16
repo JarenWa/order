@@ -71,6 +71,13 @@ export default {
       }
     });
   },
+  onUnload() {
+      // 获取事件通道，通知上一页刷新
+      const eventChannel = this.getOpenerEventChannel();
+      if (eventChannel) {
+        eventChannel.emit('refreshData');
+      }
+    },
   methods: {
     // 下拉刷新
     onRefresh() {

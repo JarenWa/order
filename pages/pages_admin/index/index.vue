@@ -6,41 +6,70 @@
         class="tab-item"
         :class="{ active: current === 0 }"
         @click="switchTab(0)"
-      >分类管理</view>
-      <view
-        class="tab-item"
-        :class="{ active: current === 1 }"
-        @click="switchTab(1)"
-      >商品管理</view>
+      >订单管理</view>
+	  
+	  <view
+	    class="tab-item"
+	    :class="{ active: current === 1 }"
+	    @click="switchTab(1)"
+	  >预售汇总</view>
+	  
       <view
         class="tab-item"
         :class="{ active: current === 2 }"
         @click="switchTab(2)"
-      >订单管理</view>
+      >商品管理</view>
+     
+	  
+	  <view
+	    class="tab-item"
+	    :class="{ active: current === 3 }"
+	    @click="switchTab(3)"
+	  >兑换物品</view>
+	  
+	  <view
+	    class="tab-item"
+	    :class="{ active: current === 4 }"
+	    @click="switchTab(4)"
+	  >兑换管理</view>
     </view>
 
     <!-- 内容区域：滑动切换（可选） -->
     <swiper :current="current" @change="onSwiperChange" class="swiper">
       <swiper-item>
-        <categories-list v-if="current === 0" />
+        <orders-list v-if="current === 0" />
       </swiper-item>
+	  
+	  <swiper-item>
+	    <pre-orders-list v-if="current === 1" />
+	  </swiper-item>
+	  
       <swiper-item>
-        <goods-list v-if="current === 1" />
+        <goods-list v-if="current === 2" />
       </swiper-item>
-      <swiper-item>
-        <orders-list v-if="current === 2" />
-      </swiper-item>
+	  
+     
+	 
+	  <swiper-item>
+	    <exchange-goods-list v-if="current === 3" />
+	  </swiper-item>
+	  
+	  <swiper-item>
+	    <exchange-records-list v-if="current === 4" />
+	  </swiper-item>
     </swiper>
   </view>
 </template>
 
 <script>
-import CategoriesList from '../opendb-mall-categories/list.vue';
+// import CategoriesList from '../opendb-mall-categories/list.vue';
 import GoodsList from '../opendb-mall-goods/list.vue';
 import OrdersList from '../uni-pay-orders/list.vue';
-
+import PreOrdersList from '../uni-pay-orders/pre-order-list.vue';
+import ExchangeGoodsList from '../exchange/list.vue';
+import ExchangeRecordsList from '../exchange/records-list.vue';
 export default {
-  components: { CategoriesList, GoodsList, OrdersList },
+  components: {  GoodsList, OrdersList ,PreOrdersList, ExchangeGoodsList, ExchangeRecordsList},
   data() {
     return { current: 0 };
   },

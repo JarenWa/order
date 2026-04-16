@@ -32,6 +32,22 @@ exports.main = async (event, context) => {
     score: dbCmd.inc(order.score_earned)
   });
 
+  // 更新商品销量：遍历订单中的商品列表
+  if (order.goods_list && Array.isArray(order.goods_list)) {
+    const updatePromises = order.goods_list.map(item => {
+      // 确保 count 是数字类型
+      const count = Number(item.count);
+      if (isNaN(count) || count <= 0) {
+        console.warn(`商品 ${item.good_id} 的销量无效:`, item.count);
+        return Promise.resolve(); // 跳过无效数据
+      }
+      return db.collection('opendb-mall-goods').doc(item.good_id).update({
+        total_sell_count: dbCmd.inc(count)
+      });
+    });
+    await Promise.all(updatePromises);
+  }
+
   return {
     code: 0,
     message: '确认收货成功'

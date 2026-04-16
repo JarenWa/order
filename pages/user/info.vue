@@ -2,10 +2,10 @@
   <view class="user-info-container">
     <!-- 个人信息卡片（点击跳转到官方个人资料页） -->
     <view class="profile-card" @click="goToUserInfo">
-      <image class="avatar" :src="userInfo.avatarFile || '/static/default-avatar.png'"></image>
+      <image class="avatar" :src="avatarUrl" mode="aspectFill"></image>
       <view class="profile-text">
         <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
-        <text class="phone">{{ userInfo.mobile || '未绑定手机号' }}</text>
+        <text class="phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
       </view>
       <uni-icons type="arrowright" size="20" color="#999"></uni-icons>
     </view>
@@ -73,7 +73,12 @@ export default {
       addressWhere() {
         if (!this.userInfo || !this.userInfo._id) return null;
         return { user_id: this.userInfo._id };
-      }
+      },
+	  avatarUrl() {
+	      const user = this.userInfo || {};
+	      // 兼容 avatar_file 和 avatarFile 两种命名
+	      return user.avatar_file?.url || user.avatarFile?.url ;
+	    }
     },
   methods: {
     // 跳转到官方个人资料页（包含头像、昵称、手机绑定、密码修改等）

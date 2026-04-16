@@ -116,12 +116,24 @@ export default {
       currentStock: 0,          // 当前选中商品的库存
       cartCount: 0,             // 该用户该商品已在购物车中的数量
       availableStock: 0,        // 剩余可加数量 = 库存 - 购物车数量
+      // 定时刷新相关
+      refreshTimer: null,
+      refreshInterval: 10000,   // 10秒刷新一次
     };
   },
   onLoad() {
     this.loadPreGoods();
     this.loadHotGoods();
     this.loadNewGoods();
+  },
+  onShow() {
+    this.startRefreshTimer();
+  },
+  onHide() {
+    this.clearRefreshTimer();
+  },
+  onUnload() {
+    this.clearRefreshTimer();
   },
   methods: {
     // 加载预售商品
@@ -179,9 +191,9 @@ export default {
     getGoodsImage(item) {
       if (item.goods_swiper_imgs && item.goods_swiper_imgs.length) {
         const first = item.goods_swiper_imgs[0];
-        return first.url || first.fileID || '/static/default-goods.png';
+        return first.url || first.fileID || '/static/tab/goods-default.png';
       }
-      return item.goods_thumb || '/static/default-goods.png';
+      return item.goods_thumb || '/static/tab/goods-default.png';
     },
     // 商品详情
     goGoodsDetail(id) {
@@ -301,10 +313,31 @@ export default {
     closePrePopup() {
       this.$refs.prePopup.close();
     },
+
+    // ========== 定时刷新相关 ==========
+    startRefreshTimer() {
+      if (this.refreshTimer) clearInterval(this.refreshTimer);
+      this.refreshTimer = setInterval(() => {
+        this.refreshData();
+      }, this.refreshInterval);
+    },
+    clearRefreshTimer() {
+      if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+        this.refreshTimer = null;
+      }
+    },
+    refreshData() {
+      // 同时加载三个区域的数据，不阻塞界面
+      Promise.all([
+        this.loadPreGoods(),
+        this.loadHotGoods(),
+        this.loadNewGoods()
+      ]).catch(err => console.error('定时刷新数据失败', err));
+    },
   }
 };
 </script>
-
 
 <style scoped>
 .index-container { background-color: #f5f5f5; min-height: 100vh; padding: 10px; }
@@ -314,11 +347,20 @@ export default {
 .goods-item { width: 30%; background-color: #fff; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
 .goods-image { width: 100%; height: 90px; background-color: #f0f0f0; }
 .goods-info { padding: 8px; }
-.goods-name { font-size: 16px; color: #333; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.goods-standard { font-size: 14px; color: #333; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.goods_desc { font-size: 14px; color: #55aaff; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.goods-price { font-size: 16px; color: #ff6000; font-weight: bold; display: block; margin-top: 4px; }
-.add-btn { position: absolute; right: 5px; bottom: 5px; width: 20px; height: 20px; background-color: #007aff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+/* .goods-name { font-size: 12px; color: #333; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } */
+.goods-name {
+  font-size: 14px;
+  color: #333;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+.goods-standard { font-size: 12px; color: #333; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goods_desc { font-size: 12px; color: #55aaff; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goods-price { font-size: 14px; color: #ff6000; font-weight: bold; display: block; margin-top: 4px; }
+.add-btn { position: absolute; right: 5px; bottom: 5px; width: 32px; height: 32px; background-color:  rgba(0, 122, 255, 0.5);  border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 .popup-content { background-color: #fff; padding: 20px; border-radius: 12px; width: 280px; }
 .popup-title { font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px; display: block; }
 .stock-info { text-align: center; color: #666; font-size: 14px; margin-bottom: 10px; }

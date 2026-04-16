@@ -126,12 +126,12 @@ export default {
     },
     getGoodsImage(item) {
       const info = item.goodsInfo || item.good;
-      if (!info) return '/static/default-goods.png';
+      if (!info) return '/static/tab/goods-default.png';
       if (info.goods_swiper_imgs && info.goods_swiper_imgs.length) {
         const first = info.goods_swiper_imgs[0];
-        return first.url || first.fileID || '/static/default-goods.png';
+        return first.url || first.fileID || '/static/tab/goods-default.png';
       }
-      return info.goods_thumb || '/static/default-goods.png';
+      return info.goods_thumb || '/static/tab/goods-default.png';
     },
     formatAddress(addr) {
       return [addr.province_name, addr.city_name, addr.district_name, addr.street_name, addr.address].filter(v => v).join(' ');
@@ -212,6 +212,8 @@ export default {
         if (res.result.code === 0) {
           uni.hideLoading();
           uni.showToast({ title: '订单提交成功', icon: 'success' });
+		  // 通知购物车页面刷新
+		  uni.$emit('cartUpdated');
           if (!this.isPreOrder) {
             uni.removeStorageSync('selectedCartItems');
           }

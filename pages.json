@@ -10,6 +10,24 @@
       "path": "uni_modules/uni-id-pages/pages/userinfo/userinfo",
       "style": { "navigationBarTitleText": "个人中心" }
     },
+	// {
+	//   "path": "uni_modules/uni-id-pages/pages/common/webview/webview",
+	//   "style": { "navigationBarTitleText": "用户同意" }
+	// },
+	
+	
+	{
+	  "path": "pages/login/service",
+	  "style": {
+	    "navigationBarTitleText": "用户服务协议"
+	  }
+	},
+	{
+	  "path": "pages/login/privacy",
+	  "style": {
+	    "navigationBarTitleText": "隐私政策"
+	  }
+	},
     {
       "path": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
       "style": { "navigationBarTitleText": "登录" }
@@ -108,12 +126,30 @@
         "navigationBarTitleText": "个人中心"
       }
     },
+	{
+	  "path": "pages/user/info",
+	  "style": {
+	    "navigationBarTitleText": "个人中心"
+	  }
+	},
     {
-      "path": "pages/user/info",
+      "path": "pages/exchange/exchange",
       "style": {
-        "navigationBarTitleText": "个人资料"
+        "navigationBarTitleText": "积分兑换"
       }
     },
+	{
+	  "path": "pages/exchange/confirm",
+	  "style": {
+	    "navigationBarTitleText": "兑换确认"
+	  }
+	},
+	{
+	  "path": "pages/exchange/records",
+	  "style": {
+	    "navigationBarTitleText": "兑换记录"
+	  }
+	},
     {
       "path": "pages/error/404",
       "style": {
@@ -178,18 +214,36 @@
           "path": "uni-pay-orders/list",
           "style": { "navigationBarTitleText": "订单管理" }
         },
-        {
-          "path": "uni-pay-orders/add",
-          "style": { "navigationBarTitleText": "新增订单" }
-        },
+       
         {
           "path": "uni-pay-orders/edit",
           "style": { "navigationBarTitleText": "编辑订单" }
         },
-        {
-          "path": "uni-pay-orders/detail",
-          "style": { "navigationBarTitleText": "订单详情" }
-        }
+		{
+		      "path": "exchange/list",
+		      "style": {
+		        "navigationBarTitleText": "兑换物品管理"
+		      }
+		    },
+		    {
+		      "path": "exchange/add",
+		      "style": {
+		        "navigationBarTitleText": "新增兑换物品"
+		      }
+		    },
+		    {
+		      "path": "exchange/edit",
+		      "style": {
+		        "navigationBarTitleText": "编辑兑换物品"
+		      }
+		    },
+		    {
+		      "path": "exchange/detail",
+		      "style": {
+		        "navigationBarTitleText": "物品详情"
+		      }
+		    }
+       
       ]
     }
   ],
@@ -231,6 +285,7 @@
     "needLogin": [
       "^pages/cart/.*",
       "^pages/order/.*",
+	  "^pages/user/.*",
       "^pages/user/info$",
       "^pages/user/change_pwd$",
       "^pages/address/.*",
