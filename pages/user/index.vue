@@ -125,10 +125,8 @@
 
 <script>
 import { store, mutations } from '@/uni_modules/uni-id-pages/common/store.js';
-
 const db = uniCloud.database();
-const dbCmd = db.command; // 定义 dbCmd
-
+const dbCmd = db.command;
 export default {
   data() {
     return {
@@ -163,20 +161,27 @@ export default {
 	  }
   },
   onShow() {
+    console.log('onShow - store.userInfo:', store.userInfo);
+    console.log('onShow - hasLogin:', store.hasLogin);
     if (!this.checkLogin()) return;
     this.loadOrderCount();
-	 this.loadUserScore(); 
+	 this.loadUserScore();
   },
   methods: {
 	   async loadUserScore() {
 	        const userId = this.userInfo?._id;
-	        if (!userId) return;
+	        if (!userId) {
+	          console.log('userId 为空，无法加载积分');
+	          return;
+	        }
 	        try {
-	          const res = await db.collection('uni-id-users').doc(userId).field('score').get();
-	          // 注意：客户端 get 返回的结果在 res.result.data 中
-	          const userData = res.result.data[0];
-	          if (userData && userData.score !== undefined) {
-	            this.userScore = userData.score;
+				const res = await db.collection('uni-id-users').doc(userId).field('score').get();
+	          // const res = await db.collection('uni-id-users')
+	          //   .where({_id:userId})
+	          //   .get();
+
+	          if (res.result.data && res.result.data.length > 0) {
+	            this.userScore = res.result.data[0].score || 0;
 	          } else {
 	            this.userScore = 0;
 	          }
@@ -186,11 +191,12 @@ export default {
 	        }
 	      },
     checkLogin() {
+		console.log("store.userInfo",store.userInfo)
       if (!store.userInfo || !store.userInfo._id) {
         uni.navigateTo({
-          url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd',
+          url: '/pages/login/login',
           fail: () => {
-            uni.redirectTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+            uni.redirectTo({ url: '/pages/login/login' });
           }
         });
         return false;
@@ -233,46 +239,45 @@ export default {
         }
       });
     },
-    async loadOrderCount() {
-      const userId = this.userInfo._id;
-      if (!userId) return;
-
-      try {
-        // 查询各状态订单数量
-        const allRes = await db.collection('uni-pay-orders').where({ user_id: userId }).count();
-        const status0Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 0 }).count();
-        const status1Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 1 }).count();
-        const status2Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 2 }).count();
-        const status3Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 3 }).count();
-
-        this.orderCount = {
-          all: allRes.result.total || 0,
-          status0: status0Res.result.total || 0,
-          status1: status1Res.result.total || 0,
-          status2: status2Res.result.total || 0,
-          status3: status3Res.result.total || 0
-        };
-
-        // 计算待积分（状态0和1的订单积分和）
-        const pendingRes = await db.collection('uni-pay-orders')
-              .where({
-                user_id: userId,
-                status: dbCmd.in([0, 1])
-              })
-              .field('score_earned')
-              .get();
-            const pendingOrders = pendingRes?.result?.data || [];
-            let pendingScore = 0;
-            pendingOrders.forEach(item => {
-              pendingScore += item.score_earned;
-            });
-            this.pendingScore = pendingScore;
-
-
-      } catch (err) {
-        console.error('加载订单统计失败', err);
-      }
-    },
+     async loadOrderCount() {
+          const userId = this.userInfo._id;
+          if (!userId) return;
+    
+          try {
+            // 查询各状态订单数量
+            const allRes = await db.collection('uni-pay-orders').where({ user_id: userId }).count();
+            const status0Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 0 }).count();
+            const status1Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 1 }).count();
+            const status2Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 2 }).count();
+            const status3Res = await db.collection('uni-pay-orders').where({ user_id: userId, status: 3 }).count();
+    
+            this.orderCount = {
+              all: allRes.result.total || 0,
+              status0: status0Res.result.total || 0,
+              status1: status1Res.result.total || 0,
+              status2: status2Res.result.total || 0,
+              status3: status3Res.result.total || 0
+            };
+    
+            // 计算待积分（状态0和1的订单积分和）
+            const pendingRes = await db.collection('uni-pay-orders')
+                  .where({
+                    user_id: userId,
+                    status: dbCmd.in([0, 1])
+                  })
+                  .get();
+                const pendingOrders = pendingRes?.result?.data || [];
+                let pendingScore = 0;
+                pendingOrders.forEach(item => {
+                  pendingScore += item.score_earned || 0;
+                });
+                this.pendingScore = pendingScore;
+    
+    
+          } catch (err) {
+            console.error('加载订单统计失败', err);
+          }
+        },
     logout() {
       mutations.logout();
       uni.reLaunch({ url: '/pages/index/index' });

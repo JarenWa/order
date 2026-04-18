@@ -109,7 +109,7 @@
         <view class="stock-info">
           可加购物车数: {{ availableStock }} (库存{{ currentStock }}，已加{{ cartCount }})
         </view>
-        <uni-number-box v-model="selectedCount" :min="1" :max="99999" />
+        <uni-number-box v-model="selectedCount" :min="1" @change="onCountChange" />
         <view class="popup-btns">
           <button class="popup-btn cancel" @click="closePopup">取消</button>
           <button class="popup-btn confirm" @click="addToCart" :disabled="availableStock <= 0">确定</button>
@@ -342,7 +342,7 @@ export default {
     // ========== 普通商品加购逻辑 ==========
     showAddToCart(goods) {
       if (!store.userInfo || !store.userInfo._id) {
-        uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+        uni.navigateTo({ url: '/pages/login/login' });
         return;
       }
       this.selectedGood = goods;
@@ -374,6 +374,19 @@ export default {
         return 0;
       }
     },
+    // 数量变化校验
+    onCountChange(value) {
+      if (value > this.availableStock) {
+        uni.showToast({
+          title: `最多可加${this.availableStock}件`,
+          icon: 'none',
+          duration: 2000
+        });
+        this.$nextTick(() => {
+          this.selectedCount = this.availableStock;
+        });
+      }
+    },
     async addToCart() {
       if (!this.selectedGood) return;
       const userInfo = store.userInfo;
@@ -384,8 +397,16 @@ export default {
       // 校验本次添加数量是否超过可加数量
       if (this.selectedCount > this.availableStock) {
         uni.showModal({
+          title: '数量超限',
+          content: `最多还可添加 ${this.availableStock} 件（库存${this.currentStock}，已加${this.cartCount}）`,
+          showCancel: false
+        });
+        return;
+      }
+      if (this.availableStock <= 0) {
+        uni.showModal({
           title: '提示',
-          content: `最多还可添加 ${this.availableStock} 件`,
+          content: '库存不足或已全部加入购物车',
           showCancel: false
         });
         return;

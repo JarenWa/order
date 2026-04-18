@@ -51,7 +51,7 @@ export default {
   },
   onLoad() {
     if (!this.userInfo || !this.userInfo._id) {
-      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+      uni.navigateTo({ url: '/pages/login/login' });
     }
   },
   methods: {

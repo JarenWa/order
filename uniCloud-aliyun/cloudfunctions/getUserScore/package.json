@@ -1,0 +1,9 @@
+{
+  "name": "getUserScore",
+  "version": "1.0.0",
+  "description": "获取用户积分",
+  "main": "index.js",
+  "dependencies": {
+    "uni-id-common": "file:../../../../uni_modules/uni-id-common"
+  }
+}

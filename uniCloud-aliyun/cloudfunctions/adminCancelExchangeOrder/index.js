@@ -3,6 +3,12 @@ const db = uniCloud.database();
 const dbCmd = db.command;
 
 exports.main = async (event, context) => {
+  // 权限校验：仅管理员可调用
+  const { ROLE } = context;
+  if (!ROLE || !ROLE.includes('admin')) {
+    return { code: 403, message: '无权限操作' };
+  }
+
   const { recordId } = event;
   const transaction = await db.startTransaction();
   try {

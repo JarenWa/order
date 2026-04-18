@@ -92,7 +92,7 @@ export default {
   },
   onLoad() {
     if (!this.userInfo || !this.userInfo._id) {
-      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+      uni.navigateTo({ url: '/pages/login/login' });
     }
 	// 每次页面显示时刷新（用户从其他页面返回购物车）
 	    if (this.userInfo && this.userInfo._id) {

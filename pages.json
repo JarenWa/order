@@ -7,15 +7,21 @@
       }
     },
     {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/login/bindPhone",
+      "style": {
+        "navigationBarTitleText": "绑定手机号"
+      }
+    },
+    {
       "path": "uni_modules/uni-id-pages/pages/userinfo/userinfo",
       "style": { "navigationBarTitleText": "个人中心" }
     },
-	// {
-	//   "path": "uni_modules/uni-id-pages/pages/common/webview/webview",
-	//   "style": { "navigationBarTitleText": "用户同意" }
-	// },
-	
-	
 	{
 	  "path": "pages/login/service",
 	  "style": {
@@ -281,7 +287,7 @@
     ]
   },
   "uniIdRouter": {
-    "loginPage": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
+    "loginPage": "pages/login/login",
     "needLogin": [
       "^pages/cart/.*",
       "^pages/order/.*",
@@ -289,6 +295,7 @@
       "^pages/user/info$",
       "^pages/user/change_pwd$",
       "^pages/address/.*",
+      "^pages/exchange/.*",
       "^pages_admin/.*"
     ],
     "resToLogin": true

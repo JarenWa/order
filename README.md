@@ -1,19 +1,38 @@
-## uni-admin
+# 订货小程序系统
 
-uni-admin，是基于 uni-app 和 uniCloud 的管理后台项目模版。
+基于 uni-app + uniCloud 的订货管理系统
 
-对于uniCloud的开发者而言，其后台管理系统应该使用本框架。
+## 登录注册说明
 
-我们搭建了[uni-admin演示站点](http://hellouniadmin.dcloud.net.cn/admin/)，你登录后即可快速体验uni-admin。
+### 普通用户
+- **注册方式**：仅支持微信注册 + 强制绑定手机号
+- **登录方式**：微信一键登录
+- **权限**：普通用户权限，可浏览商品、下单、积分兑换
 
-uni-admin 是开源的，遵循 MIT 协议，你可以从[Github](https://github.com/dcloudio/uni-admin)或[码云](https://gitee.com/dcloud/uni-admin)获取源码，也可以从[DCloud插件市场](https://ext.dcloud.net.cn/plugin?id=3268)快捷下载。
+### 管理员
+- **登录方式**：账号密码登录
+- **权限**：管理员权限，可管理商品、订单、兑换物品
 
-## 框架特征
-- 基于 uni-app 的宽屏适配，可自动适配 PC 宽屏和手机各端。了解[宽屏适配](https://uniapp.dcloud.io/adapt)
-- 基于 uniCloud，是 serverless 的云开发。了解[uniCloud](https://uniapp.dcloud.io/uniCloud/README)
-- 基于 uni-id，使用 uni-id 的用户账户、角色、权限系统。了解[uni-id](https://uniapp.dcloud.io/uniCloud/uni-id)
+## 部署步骤
 
-## 看视频，15分钟掌握uni-admin
-<a target="_blank" href="https://www.bilibili.com/video/BV17p4y1a71x?p=13">
-    <img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-f184e7c3-1912-41b2-b81f-435d1b37c7b4/4332911b-6624-4587-8c77-78b68f1f8c78.jpg" alt="uni-admin视频教程" style="width: 60%;">
-</a>
+1. 在 HBuilderX 中打开项目
+2. 右键 `uniCloud-aliyun/cloudfunctions` 目录，上传所有云函数
+3. 配置微信小程序 AppID（manifest.json）
+4. 配置短信服务（uniCloud 控制台）
+5. 运行到微信开发者工具
+
+## 云函数说明
+
+- `weixinLogin` - 微信登录
+- `registerUser` - 用户注册（绑定手机号）
+- `sendSmsCode` - 发送短信验证码
+- `createOrder` - 创建订单
+- `adminCompleteOrder` - 管理员完成订单
+- `adminUpdateOrder` - 管理员修改订单
+- 其他管理员云函数均需要管理员权限
+
+## 注意事项
+
+- 所有 admin 开头的云函数都有权限校验
+- 注册用户默认为普通用户角色
+- 管理员账号需要在数据库手动创建

@@ -1,0 +1,9 @@
+{
+  "name": "getOrderStats",
+  "version": "1.0.0",
+  "description": "获取用户订单统计",
+  "main": "index.js",
+  "dependencies": {
+    "uni-id-common": "file:../../../../uni_modules/uni-id-common"
+  }
+}

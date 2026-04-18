@@ -32,105 +32,115 @@ exports.main = async (event, context) => {
     }
   }
 
-  // 1. 获取地址信息
-  const addressRes = await db.collection('uni-id-address').doc(addressId).get();
-  const address = addressRes.data[0];
-  if (!address) return { code: 404, message: '地址不存在' };
+  // 使用事务确保库存检查和扣减的原子性
+  const transaction = await db.startTransaction();
 
-  // 2. 获取商品最新信息
-  const goodIds = selectedItems.map(item => item.good_id);
-  const goodsRes = await db.collection('opendb-mall-goods')
-    .where({ _id: dbCmd.in(goodIds) })
-    .field({
-      _id: true,
-      name: true,
-      standard: true,
-      goods_price: true,
-      remain_count: true
-    })
-    .get();
-
-  const goodsMap = {};
-  goodsRes.data.forEach(g => { goodsMap[g._id] = g; });
-
-  const orderGoods = [];
-  let totalAmount = 0; // 单位：分
-
-  for (const item of selectedItems) {
-    const good = goodsMap[item.good_id];
-    if (!good) return { code: 400, message: `商品 ${item.goodsInfo?.name || ''} 已下架或不存在` };
-    if (good.remain_count < item.good_count) {
-      return { code: 400, message: `商品 ${good.name} 库存不足，当前库存 ${good.remain_count}` };
-    }
-    const total = good.goods_price * item.good_count;
-    totalAmount += total;
-
-    orderGoods.push({
-      good_id: good._id,
-      name: good.name,
-      standard: good.standard || '',
-      price: good.goods_price,
-      count: item.good_count,
-      total: total
-    });
-  }
-
-  // 3. 积分计算（每元积0.01分，存储整数）
-  const scoreEarned = Math.ceil(totalAmount / 100);
-
-  // 4. 生成订单号
-  const orderNo = 'ORD' + Date.now() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-
-  // 5. 原子扣减库存
   try {
+    // 1. 获取地址信息
+    const addressRes = await transaction.collection('uni-id-address').doc(addressId).get();
+    const address = addressRes.data;
+    if (!address) {
+      await transaction.rollback();
+      return { code: 404, message: '地址不存在' };
+    }
+
+    // 2. 获取商品最新信息（在事务中查询，确保数据一致性）
+    const goodIds = selectedItems.map(item => item.good_id);
+    const goodsRes = await transaction.collection('opendb-mall-goods')
+      .where({ _id: dbCmd.in(goodIds) })
+      .field({
+        _id: true,
+        name: true,
+        standard: true,
+        goods_price: true,
+        remain_count: true
+      })
+      .get();
+
+    const goodsMap = {};
+    goodsRes.data.forEach(g => { goodsMap[g._id] = g; });
+
+    const orderGoods = [];
+    let totalAmount = 0; // 单位：分
+
+    // 3. 校验库存（在事务中）
+    for (const item of selectedItems) {
+      const good = goodsMap[item.good_id];
+      if (!good) {
+        await transaction.rollback();
+        return { code: 400, message: `商品 ${item.goodsInfo?.name || ''} 已下架或不存在` };
+      }
+      if (good.remain_count < item.good_count) {
+        await transaction.rollback();
+        return { code: 400, message: `商品 ${good.name} 库存不足，当前库存 ${good.remain_count}` };
+      }
+      const total = good.goods_price * item.good_count;
+      totalAmount += total;
+
+      orderGoods.push({
+        good_id: good._id,
+        name: good.name,
+        standard: good.standard || '',
+        price: good.goods_price,
+        count: item.good_count,
+        total: total
+      });
+    }
+
+    // 4. 积分计算（存储的积分*100，实际每元积0.01积分，存储整数）
+    const scoreEarned = Math.ceil(totalAmount / 100);
+
+    // 5. 生成订单号
+    const orderNo = 'ORD' + Date.now() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+    // 6. 原子扣减库存（在事务中）
     const stockUpdatePromises = selectedItems.map(item => {
-      return db.collection('opendb-mall-goods').doc(item.good_id).update({
+      return transaction.collection('opendb-mall-goods').doc(item.good_id).update({
         remain_count: dbCmd.inc(-item.good_count)
       });
     });
     await Promise.all(stockUpdatePromises);
-  } catch (e) {
-    console.error('库存扣减失败', e);
-    return { code: 500, message: '库存扣减失败' };
-  }
 
-  // 6. 创建订单（增加 is_pre_order 字段）
-  const orderData = {
-    order_no: orderNo,
-    user_id: userId,
-    consignee: address.name,
-    mobile: address.mobile,
-    address: address.formatted_address || `${address.province_name || ''}${address.city_name || ''}${address.district_name || ''}${address.street_name || ''}${address.address || ''}`,
-    total_amount: totalAmount,
-    actual_payment: totalAmount,
-    score_earned: scoreEarned,
-    status: 0,
-    goods_list: orderGoods,
-    remark: remark || '',
-    create_date: Date.now(),
-    update_date: Date.now(),
-    is_pre_order: isPreOrder // 新增字段
-  };
+    // 7. 创建订单（在事务中）
+    const orderData = {
+      order_no: orderNo,
+      user_id: userId,
+      consignee: address.name,
+      mobile: address.mobile,
+      address: address.formatted_address || `${address.province_name || ''}${address.city_name || ''}${address.district_name || ''}${address.street_name || ''}${address.address || ''}`,
+      total_amount: totalAmount,
+      actual_payment: totalAmount,
+      score_earned: scoreEarned,
+      status: 0,
+      goods_list: orderGoods,
+      remark: remark || '',
+      create_date: Date.now(),
+      update_date: Date.now(),
+      is_pre_order: isPreOrder
+    };
 
-  let orderRes;
-  try {
-    orderRes = await db.collection('uni-pay-orders').add(orderData);
-  } catch (e) {
-    console.error('订单创建失败', e);
-    return { code: 500, message: '订单创建失败' };
-  }
+    const orderRes = await transaction.collection('uni-pay-orders').add(orderData);
 
-  // 7. 如果不是预售订单，才删除购物车中已下单的商品
-  if (!isPreOrder) {
-    const cartIds = selectedItems.map(item => item._id).filter(id => id);
-    if (cartIds.length > 0) {
-      await db.collection('my_cart').where({ _id: dbCmd.in(cartIds) }).remove();
+    // 8. 如果不是预售订单，删除购物车中已下单的商品（在事务中）
+    if (!isPreOrder) {
+      const cartIds = selectedItems.map(item => item._id).filter(id => id);
+      if (cartIds.length > 0) {
+        await transaction.collection('my_cart').where({ _id: dbCmd.in(cartIds) }).remove();
+      }
     }
-  }
 
-  return {
-    code: 0,
-    message: '订单创建成功',
-    data: { orderId: orderRes.id, orderNo }
-  };
+    // 9. 提交事务
+    await transaction.commit();
+
+    return {
+      code: 0,
+      message: '订单创建成功',
+      data: { orderId: orderRes.id, orderNo }
+    };
+  } catch (e) {
+    // 回滚事务
+    await transaction.rollback();
+    console.error('订单创建失败', e);
+    return { code: 500, message: '订单创建失败: ' + e.message };
+  }
 };

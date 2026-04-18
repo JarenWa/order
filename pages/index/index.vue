@@ -74,7 +74,7 @@
         <view class="stock-info">
           可加购物车数: {{ availableStock }} (库存{{ currentStock }}，已加{{ cartCount }})
         </view>
-        <uni-number-box v-model="selectedCount" :min="1" :max="99999" />
+        <uni-number-box v-model="selectedCount" :min="1" @change="onCountChange" />
         <view class="popup-btns">
           <button class="popup-btn cancel" @click="closePopup">取消</button>
           <button class="popup-btn confirm" @click="addToCart" :disabled="availableStock <= 0">确定</button>
@@ -87,7 +87,7 @@
       <view class="popup-content" @click.stop>
         <text class="popup-title">选择数量</text>
         <view class="stock-info">库存: {{ currentStock }}</view>
-        <uni-number-box v-model="selectedCount" :min="1" :max="99999" />
+        <uni-number-box v-model="selectedCount" :min="1" @change="onPreCountChange" />
         <view class="popup-btns">
           <button class="popup-btn cancel" @click="closePrePopup">取消</button>
           <button class="popup-btn confirm" @click="goPreOrder">确定</button>
@@ -203,7 +203,7 @@ export default {
     // ========== 普通商品加购逻辑 ==========
     showAddToCart(goods) {
       if (!store.userInfo || !store.userInfo._id) {
-        uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+        uni.navigateTo({ url: '/pages/login/login' });
         return;
       }
       this.selectedGood = goods;
@@ -241,8 +241,16 @@ export default {
       // 校验本次添加数量是否超过可加数量
       if (this.selectedCount > this.availableStock) {
         uni.showModal({
+          title: '数量超限',
+          content: `最多还可添加 ${this.availableStock} 件（库存${this.currentStock}，已加${this.cartCount}）`,
+          showCancel: false
+        });
+        return;
+      }
+      if (this.availableStock <= 0) {
+        uni.showModal({
           title: '提示',
-          content: `最多还可添加 ${this.availableStock} 件`,
+          content: '库存不足或已全部加入购物车',
           showCancel: false
         });
         return;
@@ -283,7 +291,7 @@ export default {
     // ========== 预售商品下单逻辑 ==========
     showPreOrder(goods) {
       if (!store.userInfo || !store.userInfo._id) {
-        uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
+        uni.navigateTo({ url: '/pages/login/login' });
         return;
       }
       this.selectedGood = goods;
@@ -296,8 +304,16 @@ export default {
       // 校验数量是否超过库存
       if (this.selectedCount > this.currentStock) {
         uni.showModal({
+          title: '数量超限',
+          content: `库存仅剩 ${this.currentStock} 件，请减少数量`,
+          showCancel: false
+        });
+        return;
+      }
+      if (this.currentStock <= 0) {
+        uni.showModal({
           title: '提示',
-          content: `库存仅剩 ${this.currentStock} 件`,
+          content: '库存不足',
           showCancel: false
         });
         return;
@@ -312,6 +328,32 @@ export default {
     },
     closePrePopup() {
       this.$refs.prePopup.close();
+    },
+    // 普通商品数量变化校验
+    onCountChange(value) {
+      if (value > this.availableStock) {
+        uni.showToast({
+          title: `最多可加${this.availableStock}件`,
+          icon: 'none',
+          duration: 2000
+        });
+        this.$nextTick(() => {
+          this.selectedCount = this.availableStock;
+        });
+      }
+    },
+    // 预售商品数量变化校验
+    onPreCountChange(value) {
+      if (value > this.currentStock) {
+        uni.showToast({
+          title: `库存仅剩${this.currentStock}件`,
+          icon: 'none',
+          duration: 2000
+        });
+        this.$nextTick(() => {
+          this.selectedCount = this.currentStock;
+        });
+      }
     },
 
     // ========== 定时刷新相关 ==========

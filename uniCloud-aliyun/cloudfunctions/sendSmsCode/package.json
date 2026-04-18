@@ -1,0 +1,10 @@
+{
+  "name": "sendSmsCode",
+  "dependencies": {
+    "uni-id-common": "file:../../../../uni_modules/uni-id-common",
+    "uni-config-center": "file:../../../../uni_modules/uni-config-center"
+  },
+  "extensions": {
+    "uni-cloud-jql": {}
+  }
+}
