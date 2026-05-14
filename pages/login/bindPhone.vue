@@ -37,10 +37,11 @@ export default {
   
     methods: {
       async handleGetPhoneNumber(e) {
+        if (this.loading) return;
         if (e.detail.errMsg !== 'getPhoneNumber:ok') {
           return uni.showToast({ title: '需要授权手机号才能完成注册', icon: 'none' });
         }
-  
+
         this.loading = true;
   
         try {

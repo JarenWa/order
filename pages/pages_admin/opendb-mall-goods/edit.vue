@@ -1,15 +1,20 @@
 <template>
   <view class="uni-container">
     <uni-forms ref="form" :model="formData" validate-trigger="submit" err-show-type="toast">
-      <!-- 基本信息 -->
+      <uni-forms-item name="sku" label="货号(SKU)" required>
+        <uni-easyinput placeholder="商品货号，用于扫码入库" v-model="formData.sku" trim="both" />
+      </uni-forms-item>
       <uni-forms-item name="name" label="名称" required>
         <uni-easyinput placeholder="商品名称" v-model="formData.name" trim="both" />
       </uni-forms-item>
       <uni-forms-item name="remain_count" label="库存数量" required>
         <uni-easyinput placeholder="库存数量" type="number" v-model="formData.remain_count" />
       </uni-forms-item>
-      <uni-forms-item name="priceYuan" label="价格(元)" required>
+      <uni-forms-item name="priceYuan" label="售价(元)" required>
         <uni-easyinput placeholder="请输入价格，如29.90" type="digit" v-model="formData.priceYuan" @blur="formatPrice" />
+      </uni-forms-item>
+      <uni-forms-item name="originalPriceYuan" label="原价(元)">
+        <uni-easyinput placeholder="划线原价，可不填" type="digit" v-model="formData.originalPriceYuan" @blur="formatOriginalPrice" />
       </uni-forms-item>
       <uni-forms-item name="standard" label="商品规格" required>
         <uni-easyinput placeholder="商品规格" v-model="formData.standard" trim="both" />
@@ -17,17 +22,35 @@
       <uni-forms-item label="商品类别" name="category">
         <uni-data-select v-model="formData.category" :localdata="categoryOptions" placeholder="请选择商品类别" />
       </uni-forms-item>
-      <uni-forms-item name="production_date" label="生产日期">
-        <picker mode="date" fields="month" :value="formData.production_date" @change="onProductionDateChange">
-          <view class="uni-input">{{ formData.production_date || '请选择年月' }}</view>
-        </picker>
-      </uni-forms-item>
       <uni-forms-item name="shelf_life_months" label="保质期(月)">
         <uni-easyinput placeholder="请输入月份数" type="number" v-model="formData.shelf_life_months" @blur="formatShelfLife" />
+      </uni-forms-item>
+      <uni-forms-item name="warning_count" label="库存预警阈值">
+        <uni-easyinput placeholder="低于此值标红提醒" type="number" v-model="formData.warning_count" />
+      </uni-forms-item>
+      <uni-forms-item name="sort_weight" label="排序权重">
+        <uni-easyinput placeholder="越大越靠前" type="number" v-model="formData.sort_weight" />
       </uni-forms-item>
       <uni-forms-item name="goods_desc" label="商品简介">
         <uni-easyinput placeholder="商品简短描述" v-model="formData.goods_desc" trim="both" />
       </uni-forms-item>
+      <uni-forms-item name="goods_remark" label="商品备注">
+        <uni-easyinput placeholder="商品备注信息" v-model="formData.goods_remark" trim="both" />
+      </uni-forms-item>
+
+      <uni-forms-item name="goods_thumb" label="缩略图">
+        <uni-file-picker
+          v-model="formData.goods_thumb_file"
+          file-mediatype="image"
+          mode="grid"
+          :limit="1"
+          title="上传1张缩略图"
+          @success="handleThumbSuccess"
+          @fail="handleUploadFail"
+          @delete="handleThumbDelete"
+        />
+      </uni-forms-item>
+
       <uni-forms-item name="goods_swiper_imgs" label="详情轮播图">
         <uni-file-picker
           v-model="formData.goods_swiper_imgs"
@@ -40,18 +63,7 @@
           @delete="handleSwiperDelete"
         />
       </uni-forms-item>
-      <uni-forms-item name="goods_introduce_imgs" label="详情介绍图">
-        <uni-file-picker
-          v-model="formData.goods_introduce_imgs"
-          file-mediatype="image"
-          mode="grid"
-          :limit="5"
-          title="最多上传5张"
-          @success="handleIntroduceSuccess"
-          @fail="handleUploadFail"
-          @delete="handleIntroduceDelete"
-        />
-      </uni-forms-item>
+
       <uni-forms-item name="is_hot" label="是否热销">
         <switch @change="binddata('is_hot', $event.detail.value)" :checked="formData.is_hot" />
       </uni-forms-item>
@@ -61,15 +73,13 @@
       <uni-forms-item name="is_on_sale" label="是否上架">
         <switch @change="binddata('is_on_sale', $event.detail.value)" :checked="formData.is_on_sale" />
       </uni-forms-item>
-	  <uni-forms-item name="is_pre" label="是否预售">
-	    <switch @change="binddata('is_pre', $event.detail.value)" :checked="formData.is_pre" />
-	  </uni-forms-item>
-      <uni-forms-item name="tag" label="商品标签">
-        <uni-data-checkbox :multiple="true" v-model="formData.tag" />
+      <uni-forms-item name="is_pre" label="是否预售">
+        <switch @change="binddata('is_pre', $event.detail.value)" :checked="formData.is_pre" />
       </uni-forms-item>
       <uni-forms-item name="operater" label="操作员">
         <uni-easyinput placeholder="操作员" v-model="formData.operater" />
       </uni-forms-item>
+
       <view class="uni-button-group">
         <button type="primary" class="uni-button" @click="submit">提交</button>
       </view>
@@ -81,7 +91,7 @@
 import { validator } from '../../../js_sdk/validator/opendb-mall-goods.js'
 
 const db = uniCloud.database()
-const dbCollectionName = 'opendb-mall-goods'
+const dbCollectionName = 'goods'
 
 function getValidator(fields) {
   let result = {}
@@ -96,25 +106,27 @@ function getValidator(fields) {
 export default {
   data() {
     let formData = {
+      sku: '',
       name: '',
       remain_count: 999,
       goods_price: null,
       priceYuan: '',
+      original_price: null,
+      originalPriceYuan: '',
       goods_desc: '',
+      goods_remark: '',
       standard: '',
       category: '',
-      production_date: '',
       shelf_life_months: null,
+      goods_thumb: '',
+      goods_thumb_file: [],
       goods_swiper_imgs: [],
-      goods_introduce_imgs: [],
-      is_hot: null,
-      is_new: null,
+      is_hot: false,
+      is_new: false,
       is_on_sale: true,
-	  is_pre: null,
-      tag: [],
-      comment_count: 0,
-      total_sell_count: 0,
-      last_modify_date: null,
+      is_pre: false,
+      warning_count: 10,
+      sort_weight: 0,
       operater: ''
     }
     return {
@@ -129,14 +141,16 @@ export default {
             { pattern: /^\d+(\.\d{0,2})?$/, errorMessage: '价格最多两位小数' }
           ]
         },
-        production_date: {
-          rules: [{ pattern: /^\d{4}-\d{2}$/, errorMessage: '生产日期格式为YYYY-MM' }]
+        originalPriceYuan: {
+          rules: [
+            { pattern: /^\d+(\.\d{0,2})?$/, errorMessage: '价格最多两位小数' }
+          ]
         },
         shelf_life_months: {
           rules: [{ pattern: /^[1-9]\d*$/, errorMessage: '请输入正整数' }]
         },
         goods_swiper_imgs: { rules: [] },
-        goods_introduce_imgs: { rules: [] },
+        goods_thumb_file: { rules: [] }
       }
     }
   },
@@ -164,8 +178,18 @@ export default {
         this.formData.goods_price = null
       }
     },
-    onProductionDateChange(e) {
-      this.formData.production_date = e.detail.value
+    formatOriginalPrice() {
+      if (this.formData.originalPriceYuan) {
+        let yuan = parseFloat(this.formData.originalPriceYuan)
+        if (!isNaN(yuan)) {
+          this.formData.original_price = Math.round(yuan * 100)
+          this.formData.originalPriceYuan = yuan.toFixed(2)
+        } else {
+          this.formData.original_price = null
+        }
+      } else {
+        this.formData.original_price = null
+      }
     },
     formatShelfLife() {
       if (this.formData.shelf_life_months) {
@@ -177,17 +201,21 @@ export default {
         }
       }
     },
+    handleThumbSuccess(e) {
+      const validFiles = e.tempFiles.filter(file => file.url || file.fileID)
+      if (validFiles.length > 0) {
+        this.formData.goods_thumb = validFiles[0].url || validFiles[0].fileID
+      }
+    },
+    handleThumbDelete() {
+      this.formData.goods_thumb = ''
+      this.formData.goods_thumb_file = []
+    },
     handleSwiperSuccess(e) {
       console.log('轮播图上传成功', e.tempFiles)
     },
-    handleIntroduceSuccess(e) {
-      console.log('介绍图上传成功', e.tempFiles)
-    },
     handleSwiperDelete(e) {
       console.log('轮播图删除', e.tempFile)
-    },
-    handleIntroduceDelete(e) {
-      console.log('介绍图删除', e.tempFile)
     },
     handleUploadFail(e) {
       console.error('上传失败', e)
@@ -195,10 +223,7 @@ export default {
     },
     async loadCategories() {
       const db = uniCloud.databaseForJQL()
-      const res = await db
-        .collection('opendb-mall-categories')
-        .field('_id, name')
-        .get()
+      const res = await db.collection('opendb-mall-categories').field('_id, name').get()
       this.categoryOptions = res.data.map(item => ({
         value: item._id,
         text: item.name
@@ -208,22 +233,23 @@ export default {
       uni.showLoading({ mask: true })
       db.collection(dbCollectionName)
         .doc(id)
-        .field(
-          'name,remain_count,goods_price,goods_desc,standard,category,production_date,shelf_life_months,goods_swiper_imgs,goods_introduce_imgs,goods_thumb,is_hot,is_new,is_on_sale,is_pre,tag,comment_count,total_sell_count,last_modify_date,operater'
-        )
+        .field('sku,name,remain_count,goods_price,original_price,goods_desc,goods_remark,standard,category,shelf_life_months,goods_swiper_imgs,goods_thumb,is_hot,is_new,is_on_sale,is_pre,warning_count,sort_weight,operater')
         .get()
         .then(res => {
           const data = res.result.data[0]
           if (data) {
-            this.formData = data
+            this.formData = Object.assign(this.formData, data)
             if (this.formData.goods_price) {
               this.formData.priceYuan = (this.formData.goods_price / 100).toFixed(2)
+            }
+            if (this.formData.original_price) {
+              this.formData.originalPriceYuan = (this.formData.original_price / 100).toFixed(2)
             }
             if (this.formData.goods_swiper_imgs && typeof this.formData.goods_swiper_imgs[0] === 'string') {
               this.formData.goods_swiper_imgs = this.formData.goods_swiper_imgs.map(url => ({ url }))
             }
-            if (this.formData.goods_introduce_imgs && typeof this.formData.goods_introduce_imgs[0] === 'string') {
-              this.formData.goods_introduce_imgs = this.formData.goods_introduce_imgs.map(url => ({ url }))
+            if (this.formData.goods_thumb) {
+              this.formData.goods_thumb_file = [{ url: this.formData.goods_thumb }]
             }
           }
         })
@@ -236,6 +262,7 @@ export default {
     },
     submit() {
       this.formatPrice()
+      this.formatOriginalPrice()
       if (this.formData.remain_count !== undefined && this.formData.remain_count !== null) {
         this.formData.remain_count = parseInt(this.formData.remain_count, 10)
         if (isNaN(this.formData.remain_count)) {
@@ -243,13 +270,29 @@ export default {
           return
         }
       }
+      if (this.formData.warning_count != null) {
+        this.formData.warning_count = parseInt(this.formData.warning_count, 10)
+      }
+      if (this.formData.sort_weight != null) {
+        this.formData.sort_weight = parseInt(this.formData.sort_weight, 10)
+      }
 
       uni.showLoading({ mask: true })
       this.$refs.form
         .validate()
         .then(() => {
-          const { _id, priceYuan, ...dataToSubmit } = this.formData
-          dataToSubmit.last_modify_date = Date.now()
+          const { _id, priceYuan, originalPriceYuan, goods_thumb_file, ...dataToSubmit } = this.formData
+
+          dataToSubmit.updated_at = Date.now()
+
+          dataToSubmit.goods_swiper_imgs = (dataToSubmit.goods_swiper_imgs || [])
+            .map(item => item.url || item.fileID || item)
+            .filter(v => v)
+
+          if (!dataToSubmit.goods_thumb && dataToSubmit.goods_swiper_imgs.length > 0) {
+            dataToSubmit.goods_thumb = dataToSubmit.goods_swiper_imgs[0]
+          }
+
           return db.collection(dbCollectionName).doc(this.formDataId).update(dataToSubmit)
         })
         .then(res => {

@@ -1,12 +1,12 @@
 <template>
-  <view class="edit-order-container">
+  <view class="app-container">
     <!-- 地址选择 -->
-    <view class="address-section" @click="selectAddress">
-      <text class="section-label">收货地址</text>
-      <view v-if="selectedAddress" class="address-info">
-        <text class="name">{{ selectedAddress.name }}</text>
-        <text class="mobile">{{ selectedAddress.mobile }}</text>
-        <text class="address">{{ selectedAddress.formatted_address || formatAddress(selectedAddress) }}</text>
+    <view class="app-card-flat address-section" @click="selectAddress">
+      <text class="app-section-title">收货地址</text>
+      <view v-if="selectedAddress" class="app-address-info">
+        <text class="app-address-name">{{ selectedAddress.name }}</text>
+        <text class="app-address-mobile">{{ selectedAddress.mobile }}</text>
+        <text class="app-address-detail">{{ selectedAddress.formatted_address || formatAddress(selectedAddress) }}</text>
       </view>
       <view v-else class="address-empty">请选择收货地址</view>
       <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
@@ -16,12 +16,12 @@
     <uni-card title="商品明细" :is-shadow="true" margin="10px 0">
       <view v-for="(item, index) in goodsList" :key="index" class="goods-item">
         <view class="goods-header">
-          <text class="goods-name">{{ item.name }}</text>
-          <text class="goods-standard">{{ item.standard }}</text>
+          <text class="app-goods-name">{{ item.name }}</text>
+          <text class="app-goods-standard">{{ item.standard }}</text>
         </view>
         <view class="goods-edit">
           <view class="edit-item">
-            <text class="label">单价：¥{{ (item.price / 100).toFixed(2) }}</text>
+            <text class="label">单价：¥{{ formatPrice(item.price) }}</text>
             <text class="label">原数量：{{ item.originalCount }}</text>
           </view>
           <view class="edit-item">
@@ -35,24 +35,26 @@
               @blur="checkStock(item)"
             />
           </view>
-          <button class="delete-btn" size="mini" type="warn" @click="deleteItem(index)">删除</button>
+          <button class="app-btn app-btn-warn delete-btn" size="mini" type="warn" @click="deleteItem(index)">删除</button>
         </view>
       </view>
     </uni-card>
 
     <!-- 备注 -->
-    <view class="remark-section">
-      <text class="section-label">备注</text>
+    <view class="app-card-flat remark-section">
+      <text class="app-section-title">备注</text>
       <textarea v-model="remark" placeholder="选填：备注信息" maxlength="200" />
     </view>
 
     <!-- 提交按钮 -->
-    <button class="submit-btn" type="primary" @click="submitEdit">保存修改</button>
+    <button class="app-btn app-btn-block app-btn-primary" type="primary" @click="submitEdit">保存修改</button>
   </view>
 </template>
 
 <script>
 import { store } from '@/uni_modules/uni-id-pages/common/store.js';
+import { formatPrice, formatAddress } from '@/utils/common.js';
+
 const db = uniCloud.database();
 
 export default {
@@ -62,7 +64,7 @@ export default {
       originalOrder: null,
       selectedAddress: null,
       remark: '',
-      goodsList: [], // { good_id, name, standard, price, originalCount, count }
+      goodsList: [],
     };
   },
   onLoad(options) {
@@ -75,7 +77,8 @@ export default {
     this.loadOrderDetail();
   },
   methods: {
-    // 加载订单详情
+    formatPrice,
+    formatAddress,
     async loadOrderDetail() {
       uni.showLoading({ title: '加载中...' });
       try {
@@ -86,13 +89,11 @@ export default {
           setTimeout(() => uni.navigateBack(), 1500);
           return;
         }
-        // 仅允许修改待发货订单
         if (order.status !== 0) {
           uni.showToast({ title: '当前状态不可修改', icon: 'none' });
           setTimeout(() => uni.navigateBack(), 1500);
           return;
         }
-        // 检查所有权
         if (order.user_id !== store.userInfo._id) {
           uni.showToast({ title: '无权操作', icon: 'none' });
           setTimeout(() => uni.navigateBack(), 1500);
@@ -100,7 +101,6 @@ export default {
         }
         this.originalOrder = order;
         this.remark = order.remark || '';
-        // 初始化商品列表
         this.goodsList = order.goods_list.map(item => ({
           good_id: item.good_id,
           name: item.name,
@@ -117,9 +117,6 @@ export default {
         uni.hideLoading();
       }
     },
-    formatAddress(addr) {
-      return [addr.province_name, addr.city_name, addr.district_name, addr.street_name, addr.address].filter(v => v).join(' ');
-    },
     selectAddress() {
       uni.navigateTo({
         url: '/pages/address/select?selectMode=true',
@@ -130,11 +127,9 @@ export default {
         }
       });
     },
-    // 前端粗略检查
     checkStock(item) {
       if (item.count < 0) item.count = 0;
     },
-    // 删除商品项（将数量设为0并移除）
     deleteItem(index) {
       uni.showModal({
         title: '提示',
@@ -146,13 +141,11 @@ export default {
         }
       });
     },
-    // 提交修改
     async submitEdit() {
       if (!this.selectedAddress) {
         uni.showToast({ title: '请选择收货地址', icon: 'none' });
         return;
       }
-      // 过滤掉数量为0的商品
       const finalGoods = this.goodsList.filter(item => item.count > 0);
       if (finalGoods.length === 0) {
         uni.showToast({ title: '订单至少保留一个商品', icon: 'none' });
@@ -165,11 +158,12 @@ export default {
           name: 'userUpdateOrder',
           data: {
             orderId: this.orderId,
-            address: {
-              consignee: this.selectedAddress.name,
-              mobile: this.selectedAddress.mobile,
-              address: this.selectedAddress.formatted_address || this.formatAddress(this.selectedAddress),
-            },
+			addressId: this.selectedAddress._id,
+            // address: {
+            //   consignee: this.selectedAddress.name,
+            //   mobile: this.selectedAddress.mobile,
+            //   address: this.selectedAddress.formatted_address || this.formatAddress(this.selectedAddress),
+            // },
             remark: this.remark,
             goodsList: finalGoods.map(item => ({
               good_id: item.good_id,
@@ -202,47 +196,17 @@ export default {
 </script>
 
 <style scoped>
-.edit-order-container {
-  padding: 10px;
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-.section-label {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 8px;
-  display: block;
-}
 .address-section {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 }
-.address-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-right: 10px;
+.address-section .app-address-info {
+  flex: 1 1 100%;
+  margin-top: 8px;
 }
-.name {
-  font-weight: bold;
-}
-.mobile {
-  color: #666;
-  margin-left: 8px;
-}
-.address {
-  font-size: 14px;
-  color: #999;
-  margin-top: 5px;
-}
-.address-empty {
-  color: #999;
-}
+.address-empty { color: #999; }
 .goods-item {
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -254,14 +218,6 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-}
-.goods-name {
-  font-size: 16px;
-  font-weight: bold;
-}
-.goods-standard {
-  font-size: 14px;
-  color: #666;
 }
 .goods-edit {
   display: flex;
@@ -284,13 +240,7 @@ export default {
 .delete-btn {
   margin-left: auto;
 }
-.remark-section {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 20px;
-}
-textarea {
+.remark-section textarea {
   width: 100%;
   min-height: 80px;
   border: 1px solid #ddd;
@@ -299,12 +249,5 @@ textarea {
   font-size: 14px;
   margin-top: 8px;
   box-sizing: border-box;
-}
-.submit-btn {
-  width: 100%;
-  height: 44px;
-  line-height: 44px;
-  border-radius: 22px;
-  background-color: #007aff;
 }
 </style>

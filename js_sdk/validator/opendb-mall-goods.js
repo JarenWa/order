@@ -1,191 +1,151 @@
-// 表单校验规则由 schema2code 生成，不建议直接修改校验规则，而建议通过 schema2code 生成, 详情: https://uniapp.dcloud.net.cn/uniCloud/schema
-
-
 const validator = {
+  "sku": {
+    "rules": [
+      { "required": true },
+      { "format": "string" },
+      { "maxLength": 30 }
+    ],
+    "title": "货号",
+    "label": "货号"
+  },
   "name": {
     "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "string"
-      },
-      {
-        "maxLength": 15
-      }
+      { "required": true },
+      { "format": "string" },
+      { "maxLength": 30 }
     ],
     "title": "名称",
     "label": "名称"
   },
   "remain_count": {
     "rules": [
-      {
-        "format": "int"
-      }
+      { "required": true },
+      { "format": "int" }
     ],
     "title": "库存数量",
-    "defaultValue": 999,
+    "defaultValue": 0,
     "label": "库存数量"
   },
   "goods_price": {
     "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "int"
-      }
+      { "required": true },
+      { "format": "int" }
     ],
-    "title": "价格",
-    "label": "价格"
+    "title": "售价",
+    "label": "售价"
   },
-  "goods_desc": {
+  "original_price": {
     "rules": [
-      {
-        "format": "string"
-      },
-      {
-        "maxLength": 15
-      }
+      { "format": "int" }
     ],
-    "title": "商品简介",
-    "label": "商品简介"
+    "title": "原价",
+    "label": "原价"
   },
   "standard": {
     "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "string"
-      },
-      {
-        "maxLength": 15
-      }
+      { "required": true },
+      { "format": "string" },
+      { "maxLength": 30 }
     ],
     "title": "商品规格",
     "label": "商品规格"
   },
   "category": {
     "rules": [
-      {
-        "format": "string"
-      }
+      { "format": "string" }
     ],
     "title": "商品类别",
     "label": "商品类别"
   },
+  "goods_desc": {
+    "rules": [
+      { "format": "string" },
+      { "maxLength": 50 }
+    ],
+    "title": "商品简介",
+    "label": "商品简介"
+  },
+  "goods_remark": {
+    "rules": [
+      { "format": "string" },
+      { "maxLength": 50 }
+    ],
+    "title": "商品备注",
+    "label": "商品备注"
+  },
+  "shelf_life_months": {
+    "rules": [
+      { "format": "int" }
+    ],
+    "title": "保质期(月)",
+    "label": "保质期(月)"
+  },
+  "goods_thumb": {
+    "rules": [
+      { "format": "string" },
+      { "pattern": "^(http://|https://|/|./|@/)\\S" }
+    ],
+    "title": "缩略图",
+    "label": "缩略图"
+  },
   "goods_swiper_imgs": {
     "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "array"
-      }
+      { "format": "array" }
     ],
     "title": "详情轮播图",
     "label": "详情轮播图"
   },
-  "goods_introduce_imgs": {
-    "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "array"
-      }
-    ],
-    "title": "详情介绍图",
-    "label": "详情介绍图"
-  },
-  "goods_thumb": {
-    "rules": [
-      {
-        "required": true
-      },
-      {
-        "format": "string"
-      },
-      {
-        "pattern": "^(http://|https://|/|./|@/)\\S"
-      }
-    ],
-    "title": "缩略图地址",
-    "label": "缩略图地址"
-  },
   "is_hot": {
     "rules": [
-      {
-        "format": "bool"
-      }
+      { "format": "bool" }
     ],
-    "title": "是否热销",
-    "label": "是否热销"
+    "title": "热销",
+    "defaultValue": false,
+    "label": "热销"
   },
   "is_new": {
     "rules": [
-      {
-        "format": "bool"
-      }
+      { "format": "bool" }
     ],
-    "title": "是否新品",
-    "label": "是否新品"
+    "title": "新品",
+    "defaultValue": false,
+    "label": "新品"
+  },
+  "is_pre": {
+    "rules": [
+      { "format": "bool" }
+    ],
+    "title": "预售",
+    "defaultValue": false,
+    "label": "预售"
   },
   "is_on_sale": {
     "rules": [
-      {
-        "format": "bool"
-      }
+      { "format": "bool" }
     ],
-    "title": "是否上架",
+    "title": "上架",
     "defaultValue": true,
-    "label": "是否上架"
+    "label": "上架"
   },
-  "tag": {
+  "warning_count": {
     "rules": [
-      {
-        "format": "array"
-      }
-    ]
-  },
-  "comment_count": {
-    "rules": [
-      {
-        "format": "int"
-      }
+      { "format": "int" }
     ],
-    "title": "评论数",
+    "title": "预警阈值",
+    "defaultValue": 10,
+    "label": "预警阈值"
+  },
+  "sort_weight": {
+    "rules": [
+      { "format": "int" }
+    ],
+    "title": "排序权重",
     "defaultValue": 0,
-    "label": "评论数"
-  },
-  "total_sell_count": {
-    "rules": [
-      {
-        "format": "int"
-      }
-    ],
-    "title": "销量",
-    "defaultValue": 0,
-    "label": "销量"
-  },
-  "last_modify_date": {
-    "rules": [
-      {
-        "format": "timestamp"
-      }
-    ],
-    "title": "最后修改时间",
-    "defaultValue": {
-      "$env": "now"
-    },
-    "label": "最后修改时间"
+    "label": "排序权重"
   },
   "operater": {
     "rules": [
-      {
-        "format": "string"
-      }
+      { "format": "string" }
     ],
     "title": "操作员",
     "label": "操作员"

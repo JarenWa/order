@@ -1,43 +1,41 @@
 <template>
   <view class="page-container">
-	  <!-- 顶部工具栏：第一行（状态筛选 + 搜索） -->
-	  <view class="toolbar">
-	    <view class="filter-menu">
-	      <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
-	        <view class="picker">
-	          {{ statusOptions[statusIndex] }}
-	          <text class="uni-icon uni-icon-arrowdown">▼</text>
-	        </view>
-	      </picker>
-	    </view>
-	    <view class="search-box">
-	      <input
-	        class="search-input"
-	        type="text"
-	        v-model="searchInput"
-	        placeholder="输入商品名称"
-	        confirm-type="search"
-	        @confirm="onSearch"
-	      />
-	      <button class="search-btn" type="default" size="mini" @click="onSearch">搜索</button>
-	    </view>
-	  </view>
-	  
-	  <!-- 第二行：类别筛选菜单 -->
-	  <view class="category-filter-row">
-		  <button type="default" size="mini" @click="setCategory">
-			  <text >设置分类</text>
-		  </button>
-		
-	    <picker @change="onCategoryFilterChange" :value="categoryIndex" :range="categoryOptions" range-key="text">
-	      <view class="picker category-picker">
-	        {{ categoryOptions[categoryIndex].text }}
-	        <text class="uni-icon uni-icon-arrowdown">▼</text>
-	      </view>
-	    </picker>
-	  </view>
-	  
-	  
+    <!-- 顶部工具栏：第一行（状态筛选 + 搜索） -->
+    <view class="toolbar">
+      <view class="filter-menu">
+        <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
+          <view class="picker">
+            {{ statusOptions[statusIndex] }}
+            <text class="uni-icon uni-icon-arrowdown">▼</text>
+          </view>
+        </picker>
+      </view>
+      <view class="search-box">
+        <input
+          class="search-input"
+          type="text"
+          v-model="searchInput"
+          placeholder="输入商品名称"
+          confirm-type="search"
+          @confirm="onSearch"
+        />
+        <button class="search-btn" type="default" size="mini" @click="onSearch">搜索</button>
+      </view>
+    </view>
+
+    <!-- 第二行：类别筛选菜单 -->
+    <view class="category-filter-row">
+      <button type="default" size="mini" @click="setCategory">
+        <text>设置分类</text>
+      </button>
+      <picker @change="onCategoryFilterChange" :value="categoryIndex" :range="categoryOptions" range-key="text">
+        <view class="picker category-picker">
+          {{ categoryOptions[categoryIndex].text }}
+          <text class="uni-icon uni-icon-arrowdown">▼</text>
+        </view>
+      </picker>
+    </view>
+
     <scroll-view
       class="list-scroll"
       scroll-y
@@ -46,17 +44,15 @@
       @scrolltolower="loadMore"
       :refresher-triggered="refreshing"
     >
-     
-
       <!-- 数据列表 -->
       <unicloud-db
         ref="udb"
         v-slot:default="{ data, loading, hasMore, error }"
         :collection="collectionList"
         :page-size="20"
-		:key="refreshKey"
+        :key="refreshKey"
         :where="whereCondition"
-        field="name,remain_count,goods_price,standard,category,goods_swiper_imgs,is_hot,is_new,is_on_sale,is_pre,production_date,shelf_life_months"
+        field="sku,name,remain_count,goods_price,original_price,standard,category,goods_thumb,goods_remark,is_hot,is_new,is_on_sale,is_pre,shelf_life_months,warning_count"
         @load="onDataLoad"
         :manual="true"
       >
@@ -80,13 +76,19 @@
                   />
                   <view class="info">
                     <text class="name">{{ item.name }}</text>
-                    <text class="price">¥{{ (item.goods_price / 100).toFixed(2) }}</text>
+                    <text class="sku">货号:{{ item.sku || '-' }}</text>
+                    <text class="price-row">
+                      <text class="price">¥{{ formatPrice(item.goods_price) }}</text>
+                      <text v-if="item.original_price" class="original-price">¥{{ formatPrice(item.original_price) }}</text>
+                    </text>
                     <text class="detail">
-                      库存:{{ item.remain_count }} | 规格:{{ item.standard }}
+                      库存:{{ item.remain_count }}
+                      <text v-if="item.warning_count != null && item.remain_count <= item.warning_count" class="warn-text">(预警:{{ item.warning_count }})</text>
+                      | 规格:{{ item.standard }}
                       | 分类:{{ getCategoryName(item.category) }}
-                      | 生产日期:{{ item.production_date || '-' }}
                       | 保质期:{{ item.shelf_life_months != null ? item.shelf_life_months + '个月' : '-' }}
                     </text>
+                    <text v-if="item.goods_remark" class="remark">备注:{{ item.goods_remark }}</text>
                     <view class="tags-row">
                       <view class="tags">
                         <text v-if="item.is_hot" class="tag hot">热销</text>
@@ -94,7 +96,11 @@
                         <text v-if="!item.is_on_sale" class="tag off">下架</text>
                         <text v-if="item.is_pre" class="tag pre">预售</text>
                       </view>
-                      <button class="stock-in-btn" size="mini" type="default" @click.stop="showStockDialog(item)">入库</button>
+                      <view class="action-btns">
+                        <button class="action-btn inbound" size="mini" @click.stop="openFlowDialog(item, 'inbound')">入库</button>
+                        <button class="action-btn check" size="mini" @click.stop="openFlowDialog(item, 'check')">盘点</button>
+                        <button class="action-btn adjust" size="mini" @click.stop="openFlowDialog(item, 'adjust')">调整</button>
+                      </view>
                     </view>
                   </view>
                 </view>
@@ -106,26 +112,80 @@
       </unicloud-db>
     </scroll-view>
 
-    <!-- 悬浮按钮：固定在右下角，不随滚动 -->
+    <!-- 悬浮按钮 -->
     <uni-fab ref="fab" horizontal="right" vertical="bottom" :pop-menu="false" @fabClick="fabClick" />
 
-    <!-- 入库弹窗 -->
-    <uni-popup ref="stockPopup" type="center" :mask-click="false">
+    <!-- 库存操作统一弹窗 -->
+    <uni-popup ref="flowPopup" type="center" :mask-click="false">
       <view class="popup-container">
-        <view class="popup-title">库存修改</view>
-        <view class="popup-item">
-          <text class="label">库存数量：</text>
-          <input class="input" type="number" v-model="editStock" placeholder="请输入库存" />
+        <view class="popup-title">
+          {{ flowType === 'inbound' ? '商品入库' : flowType === 'check' ? '库存盘点' : '库存调整' }}
         </view>
-        <view class="popup-item">
-          <text class="label">生产日期：</text>
-          <picker mode="date" fields="month" :value="editProductionDate" @change="onProductionDateChange">
-            <view class="picker-date">{{ editProductionDate || '请选择年月' }}</view>
-          </picker>
+
+        <view class="popup-goods-info">
+          <text class="popup-goods-name">{{ flowGoods.name }}</text>
+          <text class="popup-goods-sku">货号: {{ flowGoods.sku }}</text>
+          <text class="popup-goods-stock">当前库存: {{ flowGoods.remain_count }}</text>
         </view>
+
+        <!-- 入库表单 -->
+        <block v-if="flowType === 'inbound'">
+          <view class="popup-item">
+            <text class="label required">入库数量</text>
+            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
+          </view>
+          <view class="popup-item">
+            <text class="label">生产日期</text>
+            <picker mode="date" fields="month" :value="flowForm.production_date" @change="onFlowDateChange">
+              <view class="picker-date">{{ flowForm.production_date || '请选择年月' }}</view>
+            </picker>
+          </view>
+          <view class="popup-item">
+            <text class="label">成本单价(元)</text>
+            <input class="input" type="digit" v-model="flowForm.unit_cost_yuan" placeholder="可选" />
+          </view>
+          <view class="popup-item">
+            <text class="label">批次号</text>
+            <input class="input" v-model="flowForm.batch_no" placeholder="不填自动生成" />
+          </view>
+        </block>
+
+        <!-- 盘点表单 -->
+        <block v-if="flowType === 'check'">
+          <view class="popup-item">
+            <text class="label required">实际库存</text>
+            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入实际库存数量" />
+          </view>
+        </block>
+
+        <!-- 调整表单 -->
+        <block v-if="flowType === 'adjust'">
+          <view class="popup-item">
+            <text class="label required">调整方式</text>
+            <view class="radio-group">
+              <view class="radio-item" :class="{ active: flowForm.adjustType === 'add' }" @click="flowForm.adjustType = 'add'">
+                <text>增加</text>
+              </view>
+              <view class="radio-item" :class="{ active: flowForm.adjustType === 'sub' }" @click="flowForm.adjustType = 'sub'">
+                <text>减少</text>
+              </view>
+            </view>
+          </view>
+          <view class="popup-item">
+            <text class="label required">调整数量</text>
+            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
+          </view>
+        </block>
+
+        <!-- 公共备注 -->
+        <view class="popup-item">
+          <text class="label">备注</text>
+          <input class="input" v-model="flowForm.remark" placeholder="可选" />
+        </view>
+
         <view class="popup-buttons">
-          <button class="cancel-btn" @click="cancelStockDialog">取消</button>
-          <button class="confirm-btn" type="primary" @click="confirmStockUpdate">确定</button>
+          <button class="cancel-btn" @click="closeFlowDialog">取消</button>
+          <button class="confirm-btn" type="primary" @click="confirmFlow">确定</button>
         </view>
       </view>
     </uni-popup>
@@ -133,11 +193,13 @@
 </template>
 
 <script>
+import { formatPrice, getGoodsImage, onImageError } from '../../../utils/common.js';
+
 export default {
   data() {
     return {
-		refreshKey: 0,
-      collectionList: 'opendb-mall-goods',
+      refreshKey: 0,
+      collectionList: 'goods',
       searchInput: '',
       searchText: '',
       statusOptions: ['全部标签', '热销', '新品', '下架', '预售'],
@@ -148,11 +210,17 @@ export default {
       categoryValue: '',
       categoryMap: {},
       refreshing: false,
-      refreshTimer: null,
-      refreshInterval: 10000,
-      currentGoodsId: null,
-      editStock: 0,
-      editProductionDate: ''
+      // 库存操作弹窗数据
+      flowType: '', // 'inbound' | 'check' | 'adjust'
+      flowGoods: {},
+      flowForm: {
+        quantity: '',
+        production_date: '',
+        unit_cost_yuan: '',
+        batch_no: '',
+        adjustType: 'add',
+        remark: ''
+      }
     };
   },
   computed: {
@@ -180,16 +248,8 @@ export default {
       });
     });
   },
-  onShow() {
-    this.startRefreshTimer();
-  },
-  onHide() {
-    this.clearRefreshTimer();
-  },
-  onUnload() {
-    this.clearRefreshTimer();
-  },
   methods: {
+    formatPrice,
     async loadAllCategories() {
       try {
         const db = uniCloud.databaseForJQL();
@@ -209,56 +269,48 @@ export default {
         console.error('加载分类失败', err);
       }
     },
-	setCategory() {
-		uni.navigateTo({
-		  url: '../opendb-mall-categories/list',
-		  events: {
-		    refreshData: () => {
-		              // 刷新分类数据
-		              this.loadAllCategories();
-		              // 刷新商品列表（如果有筛选条件可能变化）
-		              this.$refs.udb && this.$refs.udb.loadData({ clear: true });
-		            }
-		  }
-		});
-	},
+    setCategory() {
+      uni.navigateTo({
+        url: '../opendb-mall-categories/list',
+        events: {
+          refreshData: () => {
+            this.loadAllCategories();
+            this.$refs.udb && this.$refs.udb.loadData({ clear: true });
+          }
+        }
+      });
+    },
     getCategoryName(catId) {
       if (!catId) return '-';
       return this.categoryMap[catId] || '-';
     },
     onStatusFilterChange(e) {
-      // 清空搜索
-        this.searchInput = '';
-        this.searchText = '';
-        // 更新状态筛选
-        this.statusIndex = e.detail.value;
-        const types = ['all', 'hot', 'new', 'off', 'pre'];
-        this.statusType = types[this.statusIndex];
-        // 强制刷新：改变 refreshKey 后，unicloud-db 会重新创建，或者您可以直接调用 loadData
-            // 但为了可靠，同时调用 loadData 并增加 key
-            this.refreshKey++;
-            this.$nextTick(() => {
-              this.$refs.udb && this.$refs.udb.loadData({ clear: true });
-            });
+      this.searchInput = '';
+      this.searchText = '';
+      this.statusIndex = e.detail.value;
+      const types = ['all', 'hot', 'new', 'off', 'pre'];
+      this.statusType = types[this.statusIndex];
+      this.refreshKey++;
+      this.$nextTick(() => {
+        this.$refs.udb && this.$refs.udb.loadData({ clear: true });
+      });
     },
     onCategoryFilterChange(e) {
-      // 清空搜索
-        this.searchInput = '';
-        this.searchText = '';
-        // 更新类别筛选
-        this.categoryIndex = e.detail.value;
-        this.categoryValue = this.categoryOptions[this.categoryIndex].value;
-        this.refreshKey++;
-            this.$nextTick(() => {
-              this.$refs.udb && this.$refs.udb.loadData({ clear: true });
-            });
+      this.searchInput = '';
+      this.searchText = '';
+      this.categoryIndex = e.detail.value;
+      this.categoryValue = this.categoryOptions[this.categoryIndex].value;
+      this.refreshKey++;
+      this.$nextTick(() => {
+        this.$refs.udb && this.$refs.udb.loadData({ clear: true });
+      });
     },
     onSearch() {
       this.searchText = this.searchInput;
-	   this.refreshKey++;
+      this.refreshKey++;
       this.$nextTick(() => {
-            this.$refs.udb && this.$refs.udb.loadData({ clear: true });
-          });
+        this.$refs.udb && this.$refs.udb.loadData({ clear: true });
+      });
     },
     onRefresh() {
       this.refreshing = true;
@@ -273,15 +325,9 @@ export default {
       console.log('商品数据加载', data);
     },
     getImageSrc(item) {
-      if (item._imgError || !item.goods_swiper_imgs || !item.goods_swiper_imgs.length) {
-        return '/static/tab/goods-default.png';
-      }
-      const firstImg = item.goods_swiper_imgs[0];
-      return firstImg.url || firstImg.fileID || '/static/tab/goods-default.png';
+      return getGoodsImage(item);
     },
-    onImageError(item) {
-      item._imgError = true;
-    },
+    onImageError,
     handleItemClick(id) {
       uni.navigateTo({
         url: '../opendb-mall-goods/detail?id=' + id,
@@ -302,103 +348,83 @@ export default {
         }
       });
     },
-    startRefreshTimer() {
-      if (this.refreshTimer) clearInterval(this.refreshTimer);
-      this.refreshTimer = setInterval(() => {
-        this.refreshData();
-      }, this.refreshInterval);
+    openFlowDialog(item, type) {
+      this.flowType = type;
+      this.flowGoods = { ...item };
+      this.flowForm = {
+        quantity: '',
+        production_date: '',
+        unit_cost_yuan: '',
+        batch_no: '',
+        adjustType: 'add',
+        remark: ''
+      };
+      this.$refs.flowPopup.open();
     },
-    clearRefreshTimer() {
-      if (this.refreshTimer) {
-        clearInterval(this.refreshTimer);
-        this.refreshTimer = null;
+    closeFlowDialog() {
+      this.$refs.flowPopup.close();
+      this.flowGoods = {};
+      this.flowType = '';
+    },
+    onFlowDateChange(e) {
+      this.flowForm.production_date = e.detail.value;
+    },
+    async confirmFlow() {
+      const quantity = parseInt(this.flowForm.quantity, 10);
+      if (isNaN(quantity) || quantity < 0) {
+        uni.showToast({ title: '请输入有效数量', icon: 'none' });
+        return;
       }
-    },
-    refreshData() {
-      if (this.$refs.udb) {
-        this.$refs.udb.loadData({ clear: true });
-      }
-    },
-    showStockDialog(item) {
-      this.currentGoodsId = item._id;
-      this.editStock = item.remain_count;
-      // 生产日期确保为年月格式（若原有数据包含日，只取前7位）
-      let prodDate = item.production_date || '';
-      if (prodDate && prodDate.length > 7) {
-        prodDate = prodDate.substring(0, 7);
-      }
-      this.editProductionDate = prodDate;
-      this.$refs.stockPopup.open();
-    },
-    onProductionDateChange(e) {
-      this.editProductionDate = e.detail.value;
-    },
-    cancelStockDialog() {
-      this.$refs.stockPopup.close();
-      this.currentGoodsId = null;
-      this.editStock = 0;
-      this.editProductionDate = '';
-    },
-    async confirmStockUpdate() {
-        // 关键：检查 currentGoodsId 是否有效
-        if (!this.currentGoodsId) {
-          uni.showToast({ title: '商品信息丢失，请重试', icon: 'none' });
-          return;
+
+      let payload = {
+        product_id: this.flowGoods._id,
+        type: this.flowType,
+        remark: this.flowForm.remark
+      };
+
+      if (this.flowType === 'inbound') {
+        payload.quantity = quantity;
+        if (this.flowForm.production_date) payload.production_date = this.flowForm.production_date;
+        if (this.flowForm.unit_cost_yuan) {
+          payload.unit_cost = Math.round(parseFloat(this.flowForm.unit_cost_yuan) * 100);
         }
-    
-        const stock = parseInt(this.editStock);
-        if (isNaN(stock) || stock < 0) {
-          uni.showToast({ title: '请输入有效的库存数量', icon: 'none' });
-          return;
-        }
-    
-        try {
-          const db = uniCloud.database();
-          const res = await db.collection('opendb-mall-goods').doc(this.currentGoodsId).update({
-            remain_count: stock,
-            production_date: this.editProductionDate
-          });
-           console.log('更新结果:', res); // 打印查看实际返回
-            uni.showToast({ title: '更新成功', icon: 'success' });
-			this.$refs.stockPopup.close();
-			 // 刷新列表
-			    if (this.$refs.udb) {
-			      this.$refs.udb.loadData({ clear: true }, () => {
-			        console.log('列表已刷新');
-			      });
-			    } else {
-			      console.warn('未找到 udb 引用');
-			    }
-            // 其他操作
-          } catch (err) {
-            console.error('更新失败', err);
-            uni.showToast({ title: '更新失败，请检查网络', icon: 'none' });
-          }finally {
-          // 清空数据
-          this.currentGoodsId = null;
-          this.editStock = 0;
-          this.editProductionDate = '';
-        }
+        if (this.flowForm.batch_no) payload.batch_no = this.flowForm.batch_no;
+      } else if (this.flowType === 'check') {
+        payload.quantity = quantity;
+      } else if (this.flowType === 'adjust') {
+        const sign = this.flowForm.adjustType === 'sub' ? -1 : 1;
+        payload.quantity = sign * quantity;
       }
+
+      uni.showLoading({ title: '处理中...', mask: true });
+      try {
+        const stockCo = uniCloud.importObject('stock-co');
+        await stockCo.change(payload);
+        uni.showToast({ title: '操作成功', icon: 'success' });
+        this.closeFlowDialog();
+        this.$refs.udb && this.$refs.udb.loadData({ clear: true });
+      } catch (err) {
+        console.error('库存操作失败', err);
+        uni.showModal({ content: err.message || '操作失败', showCancel: false });
+      } finally {
+        uni.hideLoading();
+      }
+    }
   }
 };
 </script>
 
 <style scoped>
-/* 页面容器，使 scroll-view 占满剩余空间，悬浮按钮相对于此容器固定 */
 .page-container {
-	  display: flex;
-	  flex-direction: column;
-	  height: 100vh;  
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 .list-scroll {
   flex: 0.85;
-  	overflow-y: auto;          
-  /* height: 100%; */
+  overflow-y: auto;
   background-color: #f5f5f5;
 }
-
-/* 工具栏样式保持不变 */
 .toolbar {
   display: flex;
   align-items: center;
@@ -408,13 +434,11 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-
 .filter-menu {
   flex-shrink: 0;
   margin-right: 10px;
   font-size: 16px;
 }
-
 .picker {
   display: flex;
   align-items: center;
@@ -423,19 +447,16 @@ export default {
   border-radius: 20px;
   background-color: #f9f9f9;
 }
-
 .uni-icon-arrowdown {
   margin-left: 4px;
   font-size: 14px;
   color: #666;
 }
-
 .search-box {
   flex: 1;
   display: flex;
   align-items: center;
 }
-
 .search-input {
   flex: 1;
   height: 36px;
@@ -445,7 +466,6 @@ export default {
   font-size: 14px;
   background-color: #f5f5f5;
 }
-
 .search-btn {
   flex-shrink: 0;
   height: 36px;
@@ -457,7 +477,6 @@ export default {
   color: #fff;
   border: none;
 }
-
 .category-filter-row {
   margin: 0 10px 10px;
   background-color: #fff;
@@ -466,23 +485,21 @@ export default {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
-  gap: 10px;  /* 按钮与选择器间距 */
+  gap: 10px;
 }
 .category-filter-row button {
-  flex-shrink: 0;  /* 防止按钮被压缩 */
+  flex-shrink: 0;
 }
 .category-picker {
-  flex: 1;  /* 占据剩余宽度 */
+  flex: 1;
   justify-content: center;
   font-size: 16px;
 }
-
 .error {
   padding: 20px;
   text-align: center;
   color: #ff5500;
 }
-
 .item-content {
   display: flex;
   align-items: flex-start;
@@ -504,20 +521,44 @@ export default {
 .name {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   color: #333;
+}
+.sku {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 2px;
+}
+.price-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
 }
 .price {
   font-size: 16px;
   color: #ff6000;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-right: 6px;
+}
+.original-price {
+  font-size: 13px;
+  color: #999;
+  text-decoration: line-through;
 }
 .detail {
   font-size: 13px;
   color: #666;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   line-height: 1.4;
+}
+.warn-text {
+  color: #f44336;
+  font-weight: bold;
+}
+.remark {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
 }
 .tags-row {
   display: flex;
@@ -541,23 +582,26 @@ export default {
 .hot { background-color: #f37b1d; }
 .new { background-color: #4caf50; }
 .off { background-color: #999; }
-.pre { background-color: #999; }
-.stock-in-btn {
-  background-color: #409eff;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  line-height: 1.2;
-  margin: 0;
-  border: none;
-  flex-shrink: 0;
+.pre { background-color: #9c27b0; }
+.action-btns {
+  display: flex;
+  gap: 6px;
 }
-
-/* 入库弹窗样式 */
+.action-btn {
+  margin: 0;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: none;
+  color: #fff;
+  line-height: 1.6;
+}
+.action-btn.inbound { background-color: #4caf50; }
+.action-btn.check { background-color: #ff9800; }
+.action-btn.adjust { background-color: #2196f3; }
 .popup-container {
   width: 80%;
-  max-width: 300px;
+  max-width: 320px;
   background-color: #fff;
   border-radius: 12px;
   padding: 20px;
@@ -567,17 +611,40 @@ export default {
   font-size: 18px;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+.popup-goods-info {
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+.popup-goods-name {
+  font-weight: bold;
+  font-size: 14px;
+  display: block;
+}
+.popup-goods-sku,
+.popup-goods-stock {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+  display: block;
 }
 .popup-item {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .popup-item .label {
-  width: 70px;
+  width: 80px;
   font-size: 14px;
   color: #333;
+  flex-shrink: 0;
+}
+.popup-item .label.required::before {
+  content: '* ';
+  color: #f44336;
 }
 .popup-item .input {
   flex: 1;
@@ -594,6 +661,24 @@ export default {
   font-size: 14px;
   background-color: #f9f9f9;
   text-align: center;
+}
+.radio-group {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+.radio-item {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.radio-item.active {
+  border-color: #007aff;
+  background: #e6f2ff;
+  color: #007aff;
 }
 .popup-buttons {
   display: flex;

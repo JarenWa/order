@@ -1,7 +1,7 @@
 <template>
-  <view class="user-info-container">
-    <!-- 个人信息卡片（点击跳转到官方个人资料页） -->
-    <view class="profile-card" @click="goToUserInfo">
+  <view class="app-container-no-padding">
+    <!-- 个人信息卡片 -->
+    <view class="app-card profile-card" @click="goToUserInfo">
       <image class="avatar" :src="avatarUrl" mode="aspectFill"></image>
       <view class="profile-text">
         <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
@@ -10,24 +10,23 @@
       <uni-icons type="arrowright" size="20" color="#999"></uni-icons>
     </view>
 
-
     <!-- 地址管理 -->
-    <view class="address-section">
+    <view class="app-card address-section">
       <view class="section-header">
-        <text class="section-title">收货地址</text>
+        <text class="app-section-title">收货地址</text>
         <text class="add-btn" @click="addAddress">+ 新增</text>
       </view>
 
-        <unicloud-db
-          ref="udb"
-          v-slot:default="{ data, loading, error }"
-          collection="uni-id-address"
-          :where="addressWhere"
-          orderby="is_default desc, create_date desc"
-          @load="onAddressLoad"
-        >
-        <view v-if="error" class="error">{{ error.message }}</view>
-        <view v-else-if="loading" class="loading">加载中...</view>
+      <unicloud-db
+        ref="udb"
+        v-slot:default="{ data, loading, error }"
+        collection="uni-id-address"
+        :where="addressWhere"
+        orderby="is_default desc, create_date desc"
+        @load="onAddressLoad"
+      >
+        <view v-if="error" class="app-error">{{ error.message }}</view>
+        <view v-else-if="loading" class="app-loading">加载中...</view>
         <view v-else-if="data && data.length > 0" class="address-list">
           <view
             v-for="item in data"
@@ -50,7 +49,7 @@
             </view>
           </view>
         </view>
-        <view v-else class="empty-address">暂无收货地址，点击上方新增</view>
+        <view v-else class="app-empty">暂无收货地址，点击上方新增</view>
       </unicloud-db>
     </view>
   </view>
@@ -58,36 +57,32 @@
 
 <script>
 import { store } from '@/uni_modules/uni-id-pages/common/store.js';
+import { formatAddress } from '@/utils/common.js';
 
 export default {
   data() {
     return {
-      userInfo: store.userInfo, // 从官方 store 获取用户信息
+      userInfo: store.userInfo,
     };
   },
   onShow() {
-    // 每次显示页面刷新地址列表（例如从新增/编辑页面返回）
     this.$refs.udb && this.$refs.udb.loadData({ clear: true });
   },
-   computed: {
-      addressWhere() {
-        if (!this.userInfo || !this.userInfo._id) return null;
-        return { user_id: this.userInfo._id };
-      },
-	  avatarUrl() {
-	      const user = this.userInfo || {};
-	      // 兼容 avatar_file 和 avatarFile 两种命名
-	      return user.avatar_file?.url || user.avatarFile?.url ;
-	    }
+  computed: {
+    addressWhere() {
+      if (!this.userInfo || !this.userInfo._id) return null;
+      return { user_id: this.userInfo._id };
     },
+    avatarUrl() {
+      const user = this.userInfo || {};
+      return user.avatar_file?.url || user.avatarFile?.url;
+    }
+  },
   methods: {
-    // 跳转到官方个人资料页（包含头像、昵称、手机绑定、密码修改等）
+    formatAddress,
     goToUserInfo() {
-      uni.navigateTo({
-        url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo'
-      });
+      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo' });
     },
-    // 新增地址
     addAddress() {
       uni.navigateTo({
         url: '../address/add',
@@ -98,7 +93,6 @@ export default {
         }
       });
     },
-    // 编辑地址
     editAddress(id) {
       uni.navigateTo({
         url: `../address/edit?id=${id}`,
@@ -109,7 +103,6 @@ export default {
         }
       });
     },
-    // 删除地址
     deleteAddress(id) {
       uni.showModal({
         title: '提示',
@@ -131,18 +124,6 @@ export default {
         }
       });
     },
-   
-    // 格式化完整地址（如果后台没有存储 formatted_address，可临时拼接）
-    formatAddress(item) {
-      const parts = [
-        item.province_name,
-        item.city_name,
-        item.district_name,
-        item.street_name,
-        item.address
-      ].filter(v => v);
-      return parts.join(' ');
-    },
     onAddressLoad(data) {
       console.log('地址列表加载', data);
     }
@@ -151,19 +132,11 @@ export default {
 </script>
 
 <style scoped>
-.user-info-container {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-  padding: 12px;
-}
 .profile-card {
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border-radius: 12px;
   padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin: 12px 12px 0;
 }
 .avatar {
   width: 60px;
@@ -188,10 +161,8 @@ export default {
   margin-top: 4px;
 }
 .address-section {
-  background-color: #fff;
-  border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin: 12px;
 }
 .section-header {
   display: flex;
@@ -200,11 +171,6 @@ export default {
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #eee;
-}
-.section-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
 }
 .add-btn {
   font-size: 14px;
@@ -231,7 +197,6 @@ export default {
 }
 .address-info {
   flex: 1;
-  cursor: pointer;
 }
 .name-tag {
   display: flex;
@@ -275,16 +240,5 @@ export default {
   display: flex;
   gap: 12px;
   margin-left: 10px;
-}
-.empty-address {
-  text-align: center;
-  color: #999;
-  padding: 20px 0;
-  font-size: 14px;
-}
-.error, .loading {
-  text-align: center;
-  padding: 20px;
-  color: #999;
 }
 </style>

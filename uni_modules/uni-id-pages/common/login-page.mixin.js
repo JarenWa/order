@@ -49,7 +49,7 @@ const mixin = {
 		// #ifdef MP-WEIXIN
 		if (getCurrentPages().length === 1) {
 			uni.hideHomeButton()
-			console.log('已隐藏：返回首页按钮');
+			//console.log('已隐藏：返回首页按钮');
 		}
 		// #endif
 	},

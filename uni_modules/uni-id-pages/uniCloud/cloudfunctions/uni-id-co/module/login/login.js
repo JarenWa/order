@@ -65,18 +65,17 @@ module.exports = async function (params = {}) {
       errCode: ERROR.INVALID_PARAM
     }
   }
-  // 注释掉验证码检查
-  // const needCaptcha = await getNeedCaptcha.call(this, {
-  //   username,
-  //   mobile,
-  //   email
-  // })
-  // if (needCaptcha) {
-  //   await verifyCaptcha.call(this, {
-  //     captcha,
-  //     scene: CAPTCHA_SCENE.LOGIN_BY_PWD
-  //   })
-  // }
+  const needCaptcha = await getNeedCaptcha.call(this, {
+    username,
+    mobile,
+    email
+  })
+  if (needCaptcha) {
+    await verifyCaptcha.call(this, {
+      captcha,
+      scene: CAPTCHA_SCENE.LOGIN_BY_PWD
+    })
+  }
   const {
     user,
     extraData

@@ -9,11 +9,11 @@
 		<uni-forms>
 			<uni-forms-item name="username">
 				<uni-easyinput :focus="focusUsername" @blur="focusUsername = false" class="input-box"
-					:inputBorder="false" v-model="username" placeholder="请输入手机号/用户名/邮箱" />
+					:inputBorder="false" v-model="username" placeholder="请输入手机号/用户名/邮箱" trim="all" />
 			</uni-forms-item>
 			<uni-forms-item name="password">
-				<uni-easyinput :focus="focusPassword" @blur="focusPassword = false" class="input-box" clearable
-					type="password" :inputBorder="false" v-model="password" placeholder="请输入密码" />
+					<uni-easyinput :focus="focusPassword" @blur="focusPassword = false" class="input-box" clearable
+					               type="password" :inputBorder="false" v-model="password" placeholder="请输入密码" trim="all" />
 			</uni-forms-item>
 		</uni-forms>
 		<uni-captcha v-if="needCaptcha" focus ref="captcha" scene="login-by-pwd" v-model="captcha" />
@@ -21,17 +21,16 @@
 		<uni-id-pages-agreements scope="login" ref="agreements"></uni-id-pages-agreements>
 		<button class="uni-btn" type="primary" @click="pwdLogin">登录</button>
 		<!-- 忘记密码 -->
-		<view class="link-box">
+		<!-- <view class="link-box">
 			<view v-if="!config.isAdmin">
 				<text class="forget">忘记了？</text>
 				<text class="link" @click="toRetrievePwd">找回密码</text>
 			</view>
-			<text v-if="!existAdmin" class="link" @click="toRegister">{{config.isAdmin ? '注册管理员账号': '注册账号'}}</text>
-		</view>
+			<text class="link" @click="toRegister">{{config.isAdmin ? '注册管理员账号': '注册账号'}}</text>
+			<text class="link" @click="toRegister" v-if="!config.isAdmin">注册账号</text>
+		</view> -->
 		<!-- 悬浮登录方式组件 -->
-		<!-- #ifndef MP-TOUTIAO -->
-		<uni-id-pages-fab-login ref="uniFabLogin"></uni-id-pages-fab-login>
-		<!-- #endif -->
+		<!-- <uni-id-pages-fab-login ref="uniFabLogin"></uni-id-pages-fab-login> -->
 	</view>
 </template>
 
@@ -52,30 +51,18 @@
 				"needCaptcha": false,
 				"focusUsername": false,
 				"focusPassword": false,
-				"logo": "/static/logo.png",
-				"existAdmin": true
+				"logo": "/static/logo.png"
 			}
 		},
 		onShow() {
 			// #ifdef H5
 			document.onkeydown = event => {
-				let e = event || window.event;
+				var e = event || window.event;
 				if (e && e.keyCode == 13) { //回车键的键值为13
 					this.pwdLogin()
 				}
 			};
 			// #endif
-		},
-		async onLoad() {
-			// 查询是否已经有管理员注册了，如果有，则隐藏注册管理员的入口
-			try {
-				const db = uniCloud.database();
-				let countRes = await db.collection("uni-id-users").where({role:"admin"}).count();
-				let count = countRes.result.total;
-				this.existAdmin = count > 0 ? true : false;
-			} catch(err){
-				this.existAdmin = false;
-			}
 		},
 		methods: {
 			// 页面跳转，找回密码

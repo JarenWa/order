@@ -1,0 +1,123 @@
+{
+  "bsonType": "object",
+  "permission": {
+    "read": "auth.role == 'admin'",
+    "create": "auth.role == 'admin'",
+    "update": false,
+    "delete": false
+  },
+  "properties": {
+    "_id": {
+      "description": "流水ID，系统自动生成"
+    },
+    "sku": {
+      "bsonType": "string",
+      "description": "商品货号",
+      "title": "货号",
+      "trim": "both"
+    },
+    "product_id": {
+      "bsonType": "string",
+      "description": "关联商品ID",
+      "title": "商品ID"
+    },
+    "type": {
+      "bsonType": "string",
+      "enum": ["inbound", "outbound", "check", "adjust", "order"],
+      "enumType": "string",
+      "description": "操作类型：入库(inbound)、出库(outbound)、盘点(check)、调整(adjust)、订单扣减(order)",
+      "title": "操作类型"
+    },
+    "quantity": {
+      "bsonType": "int",
+      "description": "变动数量，正数为增加，负数为减少",
+      "title": "变动数量"
+    },
+    "before_count": {
+      "bsonType": "int",
+      "description": "变动前库存",
+      "title": "变动前库存",
+      "defaultValue": 0
+    },
+    "after_count": {
+      "bsonType": "int",
+      "description": "变动后库存",
+      "title": "变动后库存",
+      "defaultValue": 0
+    },
+    "unit_cost": {
+      "bsonType": "int",
+      "description": "成本单价（单位：分），入库时可选填写",
+      "title": "成本单价(分)"
+    },
+    "production_date": {
+      "bsonType": "string",
+      "description": "生产日期（入库时填写），格式 YYYY-MM",
+      "title": "生产日期",
+      "trim": "both"
+    },
+    "batch_no": {
+      "bsonType": "string",
+      "description": "入库批次号，未填写时系统自动生成",
+      "title": "批次号",
+      "trim": "both"
+    },
+    "operator": {
+      "bsonType": "string",
+      "description": "操作人ID或姓名",
+      "title": "操作人",
+      "trim": "both"
+    },
+    "order_id": {
+      "bsonType": "string",
+      "description": "关联订单ID（订单扣减时填写）",
+      "title": "关联订单"
+    },
+    "remark": {
+      "bsonType": "string",
+      "description": "操作备注",
+      "title": "备注",
+      "trim": "both",
+      "maxLength": 200
+    },
+    "created_at": {
+      "bsonType": "timestamp",
+      "forceDefaultValue": {
+        "$env": "now"
+      },
+      "description": "操作时间",
+      "title": "操作时间"
+    }
+  },
+  "required": [
+    "sku",
+    "product_id",
+    "type",
+    "quantity",
+    "before_count",
+    "after_count"
+  ],
+  "index": [
+    {
+      "name": "idx_product_time",
+      "key": {
+        "product_id": 1,
+        "created_at": -1
+      }
+    },
+    {
+      "name": "idx_sku_time",
+      "key": {
+        "sku": 1,
+        "created_at": -1
+      }
+    },
+    {
+      "name": "idx_type_time",
+      "key": {
+        "type": 1,
+        "created_at": -1
+      }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ export default async function () {
     const {
       supportedLoginType
     } = await uniIdCo.getSupportedLoginType()
-    // console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType))
+    console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType))
     // 登录方式，服务端和客户端的映射关系
     const data = {
       smsCode: 'mobile-code',

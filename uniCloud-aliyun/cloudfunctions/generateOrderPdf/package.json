@@ -1,0 +1,10 @@
+{
+  "name": "generateOrderPdf",
+  "version": "1.0.0",
+  "description": "订单PDF生成云函数",
+  "main": "index.js",
+  "dependencies": {
+    "pdfmake": "^0.2.9",
+    "bwip-js": "^4.5.1"
+  }
+}

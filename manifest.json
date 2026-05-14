@@ -50,7 +50,7 @@
     "quickapp" : {},
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wx25d48d582551d140",
+        "appid" : "wx95149af4e3857397",
         "setting" : {
             "urlCheck" : false,
             "minified" : true,
@@ -82,6 +82,10 @@
             "mode" : "hash",
             "base" : "/admin/"
         }
+    },
+    "uniCloud" : {
+        "provider" : "aliyun",
+        "spaceId" : "mp-9e7a79aa-2383-4c00-ad3b-9d4db4a25765"
     },
     "vueVersion" : "3",
     "networkTimeout" : {

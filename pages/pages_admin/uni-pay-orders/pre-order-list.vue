@@ -319,7 +319,7 @@ export default {
 			   console.log("order" ,order)
              order.goods_list.forEach(good => {
                // 假设每个商品对象有唯一的  goods_id
-               const goodsId = good.goods_id;
+               const goodsId = good.good_id || good.goods_id;
                if (!goodsId) {
                  console.warn('商品缺少唯一标识，使用名称+规格备用', good);
                  // 如果没有 ID，则使用名称+规格作为备用键（但仍建议数据结构中包含 ID）

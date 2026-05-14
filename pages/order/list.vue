@@ -1,5 +1,5 @@
 <template>
-  <view class="order-list-container">
+  <view class="app-container">
     <unicloud-db
       ref="udb"
       v-slot:default="{ data, loading, error }"
@@ -7,51 +7,45 @@
       :where="whereCondition"
       orderby="create_date desc"
     >
-      <view v-if="error" class="error">{{ error.message }}</view>
-      <view v-else-if="loading" class="loading">加载中...</view>
+      <view v-if="error" class="app-error">{{ error.message }}</view>
+      <view v-else-if="loading" class="app-loading">加载中...</view>
       <view v-else-if="data && data.length > 0" class="order-list">
-        <view v-for="item in data" :key="item._id" class="order-item">
-          <!-- 点击整个订单进入详情（可选，这里保留点击头部区域跳转） -->
+        <view v-for="item in data" :key="item._id" class="app-card-flat order-item">
           <view class="order-header" @click="goDetail(item._id)">
-			<text class="order-pre">{{ getOrderIsPreText(item.is_pre_order) }}</text>
-			  
+            <text v-if="item.is_pre_order" class="order-pre">预售订单</text>
             <text class="order-no">订单号：{{ item.order_no }}</text>
-            <text class="order-status" :class="'status-' + item.status">{{ getStatusText(item) }}</text>
+            <text class="app-status-tag" :class="'app-status-' + item.status">{{ getStatusText(item) }}</text>
           </view>
-		  <view class="order-date">创建时间：{{formatDate(item.create_date)}}</view>
+          <view class="order-date app-text-grey">创建时间：{{ formatDate(item.create_date) }}</view>
           <view class="goods-list" @click="goDetail(item._id)">
-            <view v-for="(good, index) in item.goods_list" :key="index" class="goods-item">
-              <view class="goods-info">
-                <text class="goods-name">{{ good.name }}</text>
-                <text class="goods-standard">{{ good.standard }}</text>
-                <text class="goods-price">¥{{ (good.price / 100).toFixed(2) }} x {{ good.count }}</text>
+            <view v-for="(good, index) in item.goods_list" :key="index" class="app-goods-item">
+              <view class="app-goods-info">
+                <text class="app-goods-name">{{ good.name }}</text>
+                <text class="app-goods-standard">{{ good.standard }}</text>
+                <text class="app-goods-price-sm">¥{{ formatPrice(good.price) }} x {{ good.count }}</text>
               </view>
             </view>
           </view>
           <view class="order-footer">
-            <text class="total">共 {{ item.goods_list.length }} 件 合计 ¥{{ (item.total_amount / 100).toFixed(2) }}</text>
+            <text class="total">共 {{ item.goods_list.length }} 件 合计 ¥{{ formatPrice(item.total_amount) }}</text>
           </view>
 
-          <!-- 功能按钮组 -->
           <view class="action-buttons">
-            <!-- 取消订单（状态0） -->
             <button v-if="item.status === 0" class="action-btn cancel" size="mini" @click="confirmCancel(item._id)">取消</button>
-            <!-- 修改订单（状态0） -->
             <button v-if="item.status === 0" class="action-btn edit" size="mini" @click="editOrder(item._id)">修改</button>
-            <!-- 确认收货（状态1） -->
             <button v-if="item.status === 1" class="action-btn confirm" size="mini" @click="confirmReceive(item._id)">确认收货</button>
-            <!-- 删除订单（状态3） -->
             <button v-if="item.status === 3" class="action-btn delete" size="mini" @click="confirmDelete(item._id)">删除</button>
           </view>
         </view>
       </view>
-      <view v-else class="empty">暂无订单</view>
+      <view v-else class="app-empty">暂无订单</view>
     </unicloud-db>
   </view>
 </template>
 
 <script>
 import { store } from '@/uni_modules/uni-id-pages/common/store.js';
+import { formatDate, formatPrice, getOrderStatusText } from '@/utils/common.js';
 
 const db = uniCloud.database();
 
@@ -59,11 +53,10 @@ export default {
   data() {
     return {
       userInfo: store.userInfo,
-      status: null, // 接收从路由传入的状态参数
+      status: null,
     };
   },
   computed: {
-    // 动态查询条件
     whereCondition() {
       const condition = { user_id: this.userInfo._id };
       if (this.status !== null && this.status >= 0) {
@@ -74,7 +67,7 @@ export default {
   },
   onLoad(options) {
     if (!this.userInfo || !this.userInfo._id) {
-      uni.navigateTo({ url: '/pages/login/login' });
+      uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd' });
       return;
     }
     if (options.status !== undefined) {
@@ -82,44 +75,18 @@ export default {
     }
   },
   methods: {
-	  formatDate(timestamp) {
-	    if (!timestamp) return '-'
-	    const date = new Date(timestamp)
-	    const year = date.getFullYear()
-	    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-	    const day = date.getDate().toString().padStart(2, '0')
-	    const hours = date.getHours().toString().padStart(2, '0')
-	    const minutes = date.getMinutes().toString().padStart(2, '0')
-	    return `${year}-${month}-${day} ${hours}:${minutes}`
-	  },
+    formatDate,
+    formatPrice,
     getStatusText(item) {
-		const status = item.status;
-		// 状态3（已取消）且 admin_cancelled 为 true 时，显示“后台已取消”
-		if (status === 3 && item.admin_cancelled === true) {
-		  return '(后台)已取消';
-		}
-		// 状态2（已收货）且 admin_completed 为 true 时，显示“后台已收货”
-		if (status === 2 && item.admin_completed === true) {
-		  return '(后台)已收货';
-		}
-		// 状态0（待发货）且 admin_modified 为 true 时，显示“后台修改 已收货”
-		if (status === 0 && item.admin_modified === true) {
-		  return '(后台修改)待发货';
-		}
-      const map = { 0: '待发货', 1: '配送中', 2: '已收货', 3: '已取消' };
-      return map[status] || '未知';
+      return getOrderStatusText(item.status, {
+        admin_cancelled: item.admin_cancelled,
+        admin_completed: item.admin_completed,
+        admin_modified: item.admin_modified
+      });
     },
-	getOrderIsPreText(is_pre_order) {
-		if(is_pre_order ==true){
-			return '预售订单';
-		}
-	 
-	},
     goDetail(id) {
       uni.navigateTo({ url: './detail?id=' + id });
     },
-
-    // 取消订单（状态0 -> 状态3）
     confirmCancel(orderId) {
       uni.showModal({
         title: '提示',
@@ -136,21 +103,24 @@ export default {
     async cancelOrder(orderId) {
       uni.showLoading({ title: '处理中...' });
       try {
-        await db.collection('uni-pay-orders').doc(orderId).update({
-          status: 3,
-          update_date: Date.now()
+        const res = await uniCloud.callFunction({
+          name: 'cancelOrder',
+          data: { orderId, cancelType: 'user' }
         });
-        uni.hideLoading();
-        uni.showToast({ title: '已取消', icon: 'success' });
-        this.$refs.udb.loadData({ clear: true }); // 刷新列表
+        if (res.result.code === 0) {
+          uni.hideLoading();
+          uni.showToast({ title: '已取消', icon: 'success' });
+          this.$refs.udb.loadData({ clear: true });
+        } else {
+          uni.hideLoading();
+          uni.showModal({ content: res.result.message || '取消失败', showCancel: false });
+        }
       } catch (err) {
         uni.hideLoading();
         console.error('取消订单失败', err);
         uni.showModal({ content: err.message || '操作失败', showCancel: false });
       }
     },
-
-    // 修改订单
     editOrder(orderId) {
       uni.navigateTo({
         url: '../order/edit?id=' + orderId,
@@ -161,15 +131,12 @@ export default {
         }
       });
     },
-	
-
-    // 确认收货（状态1 -> 状态2，并发放积分）
     confirmReceive(orderId) {
       uni.showModal({
         title: '提示',
         content: '确认已收到商品？',
-		confirmText: '确认收货',
-		  cancelText: '再想想',
+        confirmText: '确认收货',
+        cancelText: '再想想',
         success: (res) => {
           if (res.confirm) {
             this.receiveOrder(orderId);
@@ -180,18 +147,14 @@ export default {
     async receiveOrder(orderId) {
       uni.showLoading({ title: '处理中...' });
       try {
-        // 调用云函数，确保积分发放和状态更新原子性
         const res = await uniCloud.callFunction({
           name: 'confirmReceive',
-          data: {
-            orderId: orderId,
-            userId: this.userInfo._id
-          }
+          data: { orderId: orderId, userId: this.userInfo._id }
         });
         if (res.result.code === 0) {
           uni.hideLoading();
           uni.showToast({ title: '确认收货成功', icon: 'success' });
-          this.$refs.udb.loadData({ clear: true }); // 刷新列表
+          this.$refs.udb.loadData({ clear: true });
         } else {
           uni.hideLoading();
           uni.showModal({ content: res.result.message, showCancel: false });
@@ -202,15 +165,12 @@ export default {
         uni.showModal({ content: err.message || '操作失败', showCancel: false });
       }
     },
-	
-
-    // 删除订单（状态3）
     confirmDelete(orderId) {
       uni.showModal({
         title: '提示',
         content: '确定要删除该订单吗？此操作不可恢复。',
-		 confirmText: '删除',
-		  cancelText: '保留',
+        confirmText: '删除',
+        cancelText: '保留',
         success: (res) => {
           if (res.confirm) {
             this.deleteOrder(orderId);
@@ -236,29 +196,14 @@ export default {
 </script>
 
 <style scoped>
-.order-list-container { padding: 10px; background-color: #f5f5f5; min-height: 100vh; }
-.order-item { background-color: #fff; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.order-item { padding: 12px; margin-bottom: 10px; }
 .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; cursor: pointer; }
 .order-no { font-size: 12px; color: #999; }
-.order-status { font-size: 12px; font-weight: bold; }
-.status-0 { color: #ff9800; }
-.status-1 { color: #2196f3; }
-.status-2 { color: #4caf50; }
-.status-3 { color: #999; }
-.order-pre { font-size: 12px; font-weight: bold;color: #55aaff; }
-
-.order-date{font-size: 12px; color: #999;}
+.order-pre { font-size: 12px; font-weight: bold; color: #55aaff; }
+.order-date { font-size: 12px; margin-bottom: 8px; }
 .goods-list { margin-bottom: 8px; cursor: pointer; }
-.goods-item { display: flex; margin-bottom: 8px; }
-.goods-image { width: 50px; height: 50px; border-radius: 4px; margin-right: 8px; }
-.goods-info { flex: 1; }
-.goods-name { font-size: 14px; }
-.goods-standard { font-size: 12px; color: #999; }
-.goods-price { font-size: 12px; color: #ff6000; }
 .order-footer { margin-top: 8px; text-align: right; }
 .total { font-size: 14px; color: #333; }
-
-/* 按钮样式 */
 .action-buttons {
   display: flex;
   justify-content: flex-end;

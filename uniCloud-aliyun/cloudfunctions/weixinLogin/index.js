@@ -29,6 +29,7 @@ exports.main = async (event, context) => {
     );
 
     if (code2SessionRes.status !== 200 || !code2SessionRes.data.openid) {
+      console.error('微信 jscode2session 失败:', JSON.stringify(code2SessionRes.data));
       return {
         code: 500,
         message: '获取微信信息失败: ' + (code2SessionRes.data.errmsg || '未知错误')

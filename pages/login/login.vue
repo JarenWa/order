@@ -118,6 +118,7 @@ export default {
     },
 // 微信登录
 weixinLogin() {
+  if (this.weixinLoading) return;
   if (!this.agreed) {
     return uni.showToast({ title: '请先同意用户协议', icon: 'none' });
   }

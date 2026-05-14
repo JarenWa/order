@@ -80,12 +80,11 @@ async function preLoginWithPassword (params = {}) {
     // 清理无用记录
     loginIPLimit = loginIPLimit.filter(item => item.last_error_time > Date.now() - passwordErrorRetryTime * 1000)
     let currentIPLimit = loginIPLimit.find(item => item.ip === clientIP)
-    // 注释掉密码错误次数限制检查
-    // if (currentIPLimit && currentIPLimit.error_times >= passwordErrorLimit) {
-    //   throw {
-    //     errCode: ERROR.PASSWORD_ERROR_EXCEED_LIMIT
-    //   }
-    // }
+    if (currentIPLimit && currentIPLimit.error_times >= passwordErrorLimit) {
+      throw {
+        errCode: ERROR.PASSWORD_ERROR_EXCEED_LIMIT
+      }
+    }
     const passwordUtils = new PasswordUtils({
       userRecord,
       clientInfo: this.getUniversalClientInfo(),

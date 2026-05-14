@@ -45,8 +45,9 @@ exports.main = async (event, context) => {
         console.warn(`商品 ${item.good_id} 的销量无效:`, item.count);
         return Promise.resolve(); // 跳过无效数据
       }
-      return db.collection('opendb-mall-goods').doc(item.good_id).update({
-        total_sell_count: dbCmd.inc(count)
+      return db.collection('goods').doc(item.good_id).update({
+        total_sold: dbCmd.inc(count),
+        updated_at: Date.now()
       });
     });
     await Promise.all(updatePromises);

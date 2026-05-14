@@ -14,7 +14,7 @@
 					class="input-box" placeholder="请输入邮箱" v-model="formData.email" trim="both" />
 			</uni-forms-item>
 			<uni-forms-item name="nickname">
-				<uni-easyinput :inputBorder="false" :focus="focusNickname" @blur="focusNickname = false" class="input-box" placeholder="请输入用户昵称"
+				<uni-easyinput :inputBorder="false" :focus="focusNickname" @blur="focusNickname = false" class="input-box" placeholder="请输入用户昵称" 
 				v-model="formData.nickname" trim="both" />
 			</uni-forms-item>
 			<uni-forms-item name="password" v-model="formData.password" required>
@@ -87,9 +87,9 @@
 									if (/^\d+$/.test(value)) {
 										callback('昵称不能为纯数字')
 									};
-									// if(/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)){
-									// 	callback('昵称不能包含中文')
-									// }
+									if(/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)){
+										callback('昵称不能包含中文')
+									}
 									return true
 								}
 							}
@@ -122,7 +122,7 @@
 		onShow() {
 			// #ifdef H5
 			document.onkeydown = event => {
-				let e = event || window.event;
+				var e = event || window.event;
 				if (e && e.keyCode == 13) { //回车键的键值为13
 					this.submit()
 				}
@@ -182,7 +182,7 @@
 
 <style lang="scss">
 	@import "@/uni_modules/uni-id-pages/common/login-page.scss";
-
+	
 	@media screen and (max-width: 690px) {
 		.uni-content{
 			margin-top: 15px;

@@ -5,9 +5,9 @@
       <uni-card title="订单信息" :is-shadow="true" margin="10px 0">
         <uni-list>
           <uni-list-item title="订单号" :right-text="orderInfo.order_no" />
-          <uni-list-item title="收货人" :right-text="orderInfo.consignee" />
-          <uni-list-item title="联系电话" :right-text="orderInfo.mobile" />
-          <uni-list-item title="收货地址" :right-text="orderInfo.address" />
+          <uni-list-item title="收货人" :right-text="orderInfo.user_address.user_name" />
+          <uni-list-item title="联系电话" :right-text="orderInfo.user_address.mobile" />
+          <uni-list-item title="收货地址" :right-text="orderInfo.user_address.formatted_address" />
         </uni-list>
       </uni-card>
 

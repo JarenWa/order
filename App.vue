@@ -56,9 +56,13 @@
 				this.init()
 			}
 
-			// 登录成功回调
+			// 登录成功回调：初始化并统一回到首页
 			uni.$on('uni-id-pages-login-success', () => {
 				this.init()
+				uni.switchTab({
+					url: '/pages/index/index',
+					fail: () => uni.reLaunch({ url: '/pages/index/index' })
+				})
 			})
 
 			// theme
@@ -93,4 +97,5 @@
 	@import '@/common/uni-icons.css';
 	@import '@/common/admin-icons.css';
 	@import '@/common/theme.scss';
+	@import '@/common/app.scss';
 </style>

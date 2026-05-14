@@ -1,0 +1,373 @@
+/* =====================================================
+   项目公共样式 - 统一 UI/UE 规范
+   ===================================================== */
+
+/* ---------- 颜色变量 ---------- */
+$app-bg: #f5f5f5;
+$app-card-bg: #ffffff;
+$app-primary: #007aff;
+$app-primary-light: rgba(0, 122, 255, 0.5);
+$app-price: #ff6000;
+$app-success: #4caf50;
+$app-warning: #ff9800;
+$app-danger: #f44336;
+$app-info: #2196f3;
+$app-text: #333333;
+$app-text-grey: #666666;
+$app-text-light: #999999;
+$app-border: #eeeeee;
+$app-image-placeholder: #f0f0f0;
+
+/* ---------- 页面容器 ---------- */
+.app-container {
+  background-color: $app-bg;
+  min-height: 100vh;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.app-container-no-padding {
+  background-color: $app-bg;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ---------- 卡片 ---------- */
+.app-card {
+  background-color: $app-card-bg;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.app-card-flat {
+  background-color: $app-card-bg;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+/* ---------- 区块标题 ---------- */
+.app-section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: $app-text;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* ---------- 商品卡片（列表） ---------- */
+.app-goods-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.app-goods-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  margin-right: 12px;
+  background-color: $app-image-placeholder;
+  flex-shrink: 0;
+}
+
+.app-goods-image-sm {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  margin-right: 10px;
+  background-color: $app-image-placeholder;
+  flex-shrink: 0;
+}
+
+.app-goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-goods-name {
+  font-size: 14px;
+  color: $app-text;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.app-goods-name-clamp {
+  font-size: 14px;
+  color: $app-text;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.app-goods-standard {
+  font-size: 12px;
+  color: $app-text-grey;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.app-goods-price {
+  font-size: 16px;
+  color: $app-price;
+  font-weight: bold;
+}
+
+.app-goods-price-sm {
+  font-size: 14px;
+  color: $app-price;
+}
+
+/* ---------- 按钮 ---------- */
+.app-btn {
+  height: 40px;
+  line-height: 40px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.app-btn-primary {
+  background-color: $app-primary;
+  color: #fff;
+}
+
+.app-btn-warn {
+  background-color: $app-danger;
+  color: #fff;
+}
+
+.app-btn-ghost {
+  background-color: #f5f5f5;
+  color: $app-text-grey;
+}
+
+.app-btn-block {
+  width: 100%;
+  height: 44px;
+  line-height: 44px;
+  border-radius: 22px;
+}
+
+/* ---------- 底部固定栏 ---------- */
+.app-footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $app-card-bg;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+/* ---------- 弹窗 ---------- */
+.app-popup-content {
+  background-color: $app-card-bg;
+  padding: 20px;
+  border-radius: 12px;
+  width: 280px;
+}
+
+.app-popup-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.app-popup-btns {
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.app-popup-btn {
+  flex: 1;
+  height: 40px;
+  line-height: 40px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.app-popup-btn-cancel {
+  background-color: #f5f5f5;
+  color: $app-text-grey;
+}
+
+.app-popup-btn-confirm {
+  background-color: $app-primary;
+  color: #fff;
+}
+
+/* ---------- 状态样式 ---------- */
+.app-status-tag {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.app-status-0 { color: $app-warning; }
+.app-status-1 { color: $app-info; }
+.app-status-2 { color: $app-success; }
+.app-status-3 { color: $app-text-light; }
+
+/* ---------- 空状态 / 错误 / 加载 ---------- */
+.app-empty,
+.app-error,
+.app-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: $app-text-light;
+  font-size: 14px;
+}
+
+/* ---------- 列表项 ---------- */
+.app-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid $app-border;
+}
+
+.app-list-item:last-child {
+  border-bottom: none;
+}
+
+.app-list-item-label {
+  font-size: 16px;
+  color: $app-text;
+}
+
+/* ---------- 信息行 ---------- */
+.app-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid $app-border;
+}
+
+.app-info-row:last-child {
+  border-bottom: none;
+}
+
+.app-info-label {
+  color: $app-text-grey;
+  font-size: 14px;
+}
+
+.app-info-value {
+  color: $app-text;
+  font-size: 14px;
+}
+
+/* ---------- 地址信息 ---------- */
+.app-address-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-address-name {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.app-address-mobile {
+  color: $app-text-grey;
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+.app-address-detail {
+  font-size: 14px;
+  color: $app-text-light;
+  margin-top: 5px;
+}
+
+/* ---------- 加号按钮 ---------- */
+.app-add-btn {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 32px;
+  height: 32px;
+  background-color: $app-primary-light;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- 标签 ---------- */
+.app-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #fff;
+  display: inline-block;
+}
+
+.app-tag-hot { background-color: #f37b1d; }
+.app-tag-new { background-color: $app-success; }
+.app-tag-off { background-color: $app-text-light; }
+
+/* ---------- 网格图片 ---------- */
+.app-image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.app-grid-image {
+  width: calc(33.33% - 6px);
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  background-color: $app-image-placeholder;
+}
+
+/* ---------- 文本工具 ---------- */
+.app-text-price {
+  color: $app-price;
+  font-weight: bold;
+}
+
+.app-text-primary {
+  color: $app-primary;
+  font-weight: bold;
+}
+
+.app-text-grey {
+  color: $app-text-light;
+  font-size: 12px;
+}
+
+.app-text-center {
+  text-align: center;
+}
+
+/* ---------- 价格划线（原价） ---------- */
+.app-original-price {
+  color: $app-text-light;
+  font-size: 12px;
+  text-decoration: line-through;
+  margin-left: 6px;
+}
+
+/* ---------- 间距 ---------- */
+.app-mb-10 { margin-bottom: 10px; }
+.app-mt-10 { margin-top: 10px; }
+.app-pb-60 { padding-bottom: 60px; }
+.app-pb-70 { padding-bottom: 70px; }
