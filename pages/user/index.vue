@@ -74,15 +74,17 @@ const dbCmd = db.command;
 export default {
   data() {
     return {
-      orderCount: { all: 0, status0: 0, status1: 0, status2: 0, status3: 0 },
+      orderCount: { all: 0, status0: 0, status1: 0, status2: 0, status3: 0 ,status4: 0},
       pendingScore: 0,
       userScore: 0,
       orderStatusCards: [
         { key: 'all', status: undefined, label: '全部订单', icon: 'list', iconColor: '#007aff', bgColor: '#f9f9f9' },
-        { key: 'status0', status: 0, label: '待发货', icon: 'paperplane', iconColor: '#ff9800', bgColor: '#fff3e0' },
+        { key: 'status0', status: 0, label: '待处理', icon: 'paperplane', iconColor: '#ff9800', bgColor: '#fff3e0' },
+		{ key: 'status4', status: 4, label: '已出单', icon: '', iconColor: '#f44336', bgColor: '#fbe9e7' },
         { key: 'status1', status: 1, label: '配送中', icon: 'upload', iconColor: '#2196f3', bgColor: '#e3f2fd' },
         { key: 'status2', status: 2, label: '已收货', icon: 'checkmarkempty', iconColor: '#4caf50', bgColor: '#e8f5e8' },
         { key: 'status3', status: 3, label: '已取消', icon: 'close', iconColor: '#f44336', bgColor: '#fbe9e7' },
+		
       ]
     };
   },
@@ -154,22 +156,24 @@ export default {
       const userId = this.userInfo._id;
       if (!userId) return;
       try {
-        const [allRes, s0, s1, s2, s3] = await Promise.all([
+        const [allRes, s0, s1, s2, s3, s4] = await Promise.all([
           db.collection('uni-pay-orders').where({ user_id: userId }).count(),
           db.collection('uni-pay-orders').where({ user_id: userId, status: 0 }).count(),
           db.collection('uni-pay-orders').where({ user_id: userId, status: 1 }).count(),
           db.collection('uni-pay-orders').where({ user_id: userId, status: 2 }).count(),
           db.collection('uni-pay-orders').where({ user_id: userId, status: 3 }).count(),
+		  db.collection('uni-pay-orders').where({ user_id: userId, status: 4 }).count(),
         ]);
         this.orderCount = {
           all: allRes.result.total || 0,
           status0: s0.result.total || 0,
           status1: s1.result.total || 0,
           status2: s2.result.total || 0,
-          status3: s3.result.total || 0
+          status3: s3.result.total || 0,
+		  status4: s4.result.total || 0
         };
         const pendingRes = await db.collection('uni-pay-orders')
-          .where({ user_id: userId, status: dbCmd.in([0, 1]) })
+          .where({ user_id: userId, status: dbCmd.in([0, 4, 1]) })
           .get();
         const pendingOrders = pendingRes?.result?.data || [];
         this.pendingScore = pendingOrders.reduce((sum, item) => sum + (item.score_earned || 0), 0);

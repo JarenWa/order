@@ -54,25 +54,26 @@
               <view class="goods-info">
                 <text class="goods-name">{{ good.name }}</text>
                 <text class="goods-standard">{{ good.standard }}</text>
-                <text class="goods-price">¥{{ (good.price / 100).toFixed(2) }} x {{ good.count }}</text>
+                <text class="goods-price">¥{{ formatPrice(good.price)}} x {{ good.count }}</text>
               </view>
             </view>
           </view>
           <view class="order-footer">
-            <text class="total">合计：¥{{ (item.total_amount / 100).toFixed(2) }}</text>
-            <text class="score">积分：{{ (item.score_earned / 100).toFixed(2) }}</text>
+            <text class="total">合计：¥{{ formatPrice(item.total_amount)}}</text>
+            <text class="score">积分：{{ formatPrice(item.score_earned) }}</text>
           </view>
           <view class="action-buttons">
+			<button v-if="item.status === 0" class="action-btn pdf" size="mini" @click="createOrderPdf(item._id)">出单</button>
             <button v-if="item.status === 0" class="action-btn edit" size="mini" @click="editOrder(item._id)">修改</button>
-            <button v-if="item.status === 0" class="action-btn cancel" size="mini" @click="confirmCancel(item)">取消</button>
-            <button v-if="item.status === 0" class="action-btn ship" size="mini" @click="confirmShip(item)">出货</button>
-            <!-- 只有未发货才显示打印按钮 -->
-              <button 
-                v-if="item.status === 0" 
-                class="action-btn print" 
-                size="mini" 
-                @click="printOrder(item)"
-              >打印</button>
+            <button v-if="item.status === 0 || item.status === 1|| item.status === 4" class="action-btn cancel" size="mini" @click="confirmCancel(item)">取消</button>	
+			
+			
+			<button v-if="item.status === 4" class="action-btn ship" size="mini" @click="confirmShip(item)">发货</button>	
+			
+   
+			
+			
+			<button v-if="item.pdf_file_url && item.status === 4" class="action-btn print" size="mini" @click="printOrderPdf(item.pdf_file_url)">打印</button>	  
             <button v-if="item.status === 1" class="action-btn complete" size="mini" @click="confirmComplete(item)">完成</button>
           </view>
         </view>
@@ -86,6 +87,7 @@
 
 <script>
 const db = uniCloud.database();
+import { formatDate, formatPrice, getOrderStatusText } from '@/utils/common.js';
 
 export default {
   data() {
@@ -93,7 +95,7 @@ export default {
 		refreshKey: 0,
       refreshing: false,
       statusFilter: null, // null 表示全部，0,1,2,3 分别对应各状态
-      statusOptions: ['全部订单', '待发货', '配送中', '已收货', '已取消'],
+      statusOptions: ['全部订单', '待处理', '配送中', '已收货', '已取消', '已出单'],
       statusIndex: 0,
       // 定时刷新相关
       refreshTimer: null,
@@ -114,7 +116,7 @@ export default {
   onLoad(options) {
     if (options.status !== undefined) {
       const status = parseInt(options.status, 10);
-      if (status >= 0 && status <= 3) {
+      if (status >= 0 && status <= 4) {
         this.statusIndex = status + 1;
         this.statusFilter = status;
       }
@@ -125,7 +127,7 @@ export default {
   },
   // 页面显示时启动定时刷新
   onShow() {
-    this.startRefreshTimer();
+    //this.startRefreshTimer();
   },
   // 页面隐藏时清除定时器
   onHide() {
@@ -151,29 +153,80 @@ export default {
     })
   },
   methods: {
-	  formatDate(timestamp) {
-	    if (!timestamp) return '-'
-	    const date = new Date(timestamp)
-	    const year = date.getFullYear()
-	    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-	    const day = date.getDate().toString().padStart(2, '0')
-	    const hours = date.getHours().toString().padStart(2, '0')
-	    const minutes = date.getMinutes().toString().padStart(2, '0')
-	    return `${year}-${month}-${day} ${hours}:${minutes}`
-	  },
-    getStatusText(item) {
-      const status = item.status;
-      // 状态3（已取消）且 admin_cancelled 为 true 时，显示“后台已取消”
-      if (status === 3 && item.admin_cancelled === true) {
-        return '(后台)已取消';
-      }
-      // 状态2（已收货）且 admin_completed 为 true 时，显示“后台已收货”
-      if (status === 2 && item.admin_completed === true) {
-        return '(后台)已收货';
-      }
-      const map = { 0: '待发货', 1: '配送中', 2: '已收货', 3: '已取消' };
-      return map[status] || '未知';
-    },
+	  formatDate,
+	  formatPrice,
+	async printOrderPdf(url) {
+		uni.showLoading({ title: '下载中...' });
+		uni.downloadFile({
+		  url: url,
+		  success: (downloadRes) => {
+		    uni.hideLoading();
+		    uni.openDocument({
+		      filePath: downloadRes.tempFilePath,
+		      fileType: 'pdf',
+		      showMenu: true
+		    });
+		  },
+		  fail: (err) => {
+		    uni.hideLoading();
+		    console.error('下载单据失败', err);
+		  }
+		});
+		
+	},
+	  
+	  // ========== 生成 PDF ==========
+	async createOrderPdf(orderId) {
+	  uni.showModal({
+	    title: '确认出单（生成单据）',
+	    content: '若生成单据，订单状态将从【待处理】转为【已出单】',    // 0——>4
+	    confirmText: '确认',
+	    cancelText: '取消',
+	    success: async (res) => {
+	      if (!res.confirm) return;
+	
+	      uni.showLoading({ title: '生成单据中...', mask: true });
+	      try {
+	        const cloudRes = await uniCloud.callFunction({
+	          name: 'generateOrderPdf',
+	          data: { orderId: orderId }
+	        });
+	
+	        if (cloudRes.result.code !== 0) {
+	          throw new Error(cloudRes.result.message || '生成单据失败');
+	        }
+	
+	        // 生成成功，更新订单状态为已出单（4）
+	        await db.collection('uni-pay-orders').doc(orderId).update({
+	          status: 4,
+	          update_date: Date.now()
+	        });
+	
+	        uni.hideLoading();
+	        uni.showToast({ 
+	          title: '单据已生成', 
+	          icon: 'success',
+	          complete: () => {
+	          }
+	        });
+	
+	      } catch (err) {
+	        uni.hideLoading();
+	        console.error('生成单据失败', err);
+	        uni.showToast({ title: err.message || '生成单据失败', icon: 'none' });
+	      }
+	    }
+	  });
+	},
+	
+	getStatusText(item) {
+	  return getOrderStatusText(item.status, {
+	    admin_cancelled: item.admin_cancelled,
+	    admin_completed: item.admin_completed,
+	    admin_modified: item.admin_modified
+	  });
+	},
+	
     getOrderIsPreText(is_pre_order) {
       if (is_pre_order == true) {
         return '预售订单';
@@ -226,6 +279,21 @@ export default {
         }
       });
     },
+	
+	confirmShip(order){
+		uni.showModal({
+		  title: '提示',
+		  content: '发货前请确认已经打印了订单',
+		  cancelText: '返回打印',
+		  confirmText: '确认发货',
+		  success: (res) => {
+		    if (res.confirm) {
+		      this.shipOrder(order);
+		    }
+		  }
+		});
+	},
+	
     async cancelOrder(order) {
       uni.showLoading({ title: '处理中...' });
       try {
@@ -247,11 +315,15 @@ export default {
         uni.showModal({ content: err.message || '操作失败', showCancel: false });
       }
     },
-    confirmShip(order) {
+	
+
+    
+    Ship(order) {
       uni.showModal({
-        title: '提示',
-        content: '确定要发货吗？',
-        confirmText: '发货',
+        title: '确认单据是否打印',
+        content: '发货前先打印单据',
+        confirmText: '已打印，去发货',  //超出显示范围导致无弹窗
+		cancelText: '去打印',
         success: (res) => {
           if (res.confirm) {
             this.shipOrder(order);
@@ -259,6 +331,7 @@ export default {
         }
       });
     },
+	
     async shipOrder(order) {
       uni.showLoading({ title: '处理中...' });
       try {
@@ -267,14 +340,17 @@ export default {
           update_date: Date.now()
         });
         uni.hideLoading();
-        uni.showToast({ title: '已发货', icon: 'success' });
+        uni.showToast({ title: '配送中', icon: 'success' });
         this.$refs.udb.loadData({ clear: true });
       } catch (err) {
         uni.hideLoading();
-        console.error('发货失败', err);
+        console.error('出货失败', err);
         uni.showModal({ content: err.message || '操作失败', showCancel: false });
       }
     },
+	
+	
+	
     async printOrder(order) {
         if (this._printing) return
         this._printing = true
@@ -353,23 +429,23 @@ export default {
     },
 
     // ========== 定时刷新相关 ==========
-    startRefreshTimer() {
-      if (this.refreshTimer) clearInterval(this.refreshTimer);
-      this.refreshTimer = setInterval(() => {
-        this.refreshData();
-      }, this.refreshInterval);
-    },
+    // startRefreshTimer() {
+    //   if (this.refreshTimer) clearInterval(this.refreshTimer);
+    //   this.refreshTimer = setInterval(() => {
+    //     this.refreshData();
+    //   }, this.refreshInterval);
+    // },
     clearRefreshTimer() {
       if (this.refreshTimer) {
         clearInterval(this.refreshTimer);
         this.refreshTimer = null;
       }
     },
-    refreshData() {
-      if (this.$refs.udb) {
-        this.$refs.udb.loadData({ clear: true });
-      }
-    },
+    // refreshData() {
+    //   if (this.$refs.udb) {
+    //     this.$refs.udb.loadData({ clear: true });
+    //   }
+    // },
   }
 };
 </script>

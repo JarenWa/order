@@ -116,9 +116,9 @@ export function getOrderStatusText(status, extra = {}) {
     return '(后台)已收货';
   }
   if (status === 0 && extra.admin_modified) {
-    return '(后台修改)待发货';
+    return '(后台修改)待处理';
   }
-  const map = { 0: '待发货', 1: '配送中', 2: '已收货', 3: '已取消' };
+  const map = { 0: '待处理', 1: '配送中', 2: '已收货', 3: '已取消' , 4:'已出单'};
   return map[status] || '未知';
 }
 

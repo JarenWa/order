@@ -123,26 +123,20 @@
 		"status": {
 			"title": "订单状态",
 			"bsonType": "int",
-			"enum": [{
-				"text": "用户删除",
-				"value": -2
-			}, {
-				"text": "已取消",
-				"value": -1
-			}, {
-				"text": "待支付",
+			"enum": [ {
+				"text": "待发货",
 				"value": 0
 			}, {
-				"text": "待发货",
+				"text": "配送中",
 				"value": 1
 			}, {
-				"text": "待收货",
+				"text": "已收货",
 				"value": 2
 			}, {
-				"text": "待评价",
+				"text": "已取消",
 				"value": 3
-			}, {
-				"text": "已完成",
+			},{
+				"text": "已出单",
 				"value": 4
 			}],
 			"description": "",

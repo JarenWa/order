@@ -31,7 +31,7 @@
           </view>
 
           <view class="action-buttons">
-            <button v-if="item.status === 0" class="action-btn cancel" size="mini" @click="confirmCancel(item._id)">取消</button>
+            <button v-if="item.status === 0 || item.status === 4" class="action-btn cancel" size="mini" @click="confirmCancel(item._id)">取消</button>
             <button v-if="item.status === 0" class="action-btn edit" size="mini" @click="editOrder(item._id)">修改</button>
             <button v-if="item.status === 1" class="action-btn confirm" size="mini" @click="confirmReceive(item._id)">确认收货</button>
             <button v-if="item.status === 3" class="action-btn delete" size="mini" @click="confirmDelete(item._id)">删除</button>

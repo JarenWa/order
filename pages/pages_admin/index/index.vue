@@ -10,8 +10,12 @@
     <view class="stats-row">
       <view class="stat-card pending" @click="goOrders(0)">
         <text class="stat-num">{{ stats.pending }}</text>
-        <text class="stat-label">待发货</text>
+        <text class="stat-label">待处理(去出单)</text>
       </view>
+	  <view class="stat-card processing" @click="goOrders(4)">
+	    <text class="stat-num">{{ stats.processing }}</text>
+	    <text class="stat-label">已出单(去发货)</text>
+	  </view>
       <view class="stat-card shipping" @click="goOrders(1)">
         <text class="stat-num">{{ stats.shipping }}</text>
         <text class="stat-label">配送中</text>
@@ -132,6 +136,7 @@ export default {
     return {
       stats: {
         pending: 0,
+		processing: 0,
         shipping: 0
       },
       warnTotal: 0,
@@ -169,12 +174,14 @@ export default {
     },
     async loadStats() {
       try {
-        const [pendingRes, shippingRes] = await Promise.all([
+        const [pendingRes, shippingRes, processingRes] = await Promise.all([
           db.collection('uni-pay-orders').where({ status: 0 }).count(),
-          db.collection('uni-pay-orders').where({ status: 1 }).count()
+          db.collection('uni-pay-orders').where({ status: 1 }).count(),
+		  db.collection('uni-pay-orders').where({ status: 4 }).count()
         ]);
         this.stats.pending = pendingRes.result ? pendingRes.result.total : 0;
         this.stats.shipping = shippingRes.result ? shippingRes.result.total : 0;
+		this.stats.processing = processingRes.result ? processingRes.result.total : 0;
       } catch (err) {
         console.error('加载统计数据失败', err);
       }
@@ -268,10 +275,9 @@ export default {
       }
     },
     goOrders(status) {
-      const url = status === 0
-        ? '../uni-pay-orders/list?status=0'
-        : '../uni-pay-orders/list?status=1';
-      uni.navigateTo({ url });
+      uni.navigateTo({
+        url: `../uni-pay-orders/list?status=${status}`
+      });
     },
     goGoodsList() {
       uni.navigateTo({ url: '../opendb-mall-goods/list' });
