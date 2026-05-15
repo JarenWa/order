@@ -2,7 +2,7 @@
   <view class="app-container">
     <!-- 预售商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">[直接预定,按期安排配送]</view>
+      <view class="section-title">[非现货,按期安排配送]</view>
       <view class="goods-list">
         <block v-for="item in preGoods" :key="item._id">
           <view class="goods-item" @click="goGoodsDetail(item._id)">
@@ -29,7 +29,7 @@
 
     <!-- 新品商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">✨ 新品推荐</view>
+      <view class="section-title">✨ 现货新品</view>
       <view class="goods-list">
         <block v-for="item in newGoods" :key="item._id">
           <view class="goods-item" @click="goGoodsDetail(item._id)">
@@ -55,7 +55,7 @@
 
     <!-- 热销商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">🔥 热销商品</view>
+      <view class="section-title">🔥 现货热销</view>
       <view class="goods-list">
         <block v-for="item in hotGoods" :key="item._id">
           <view class="goods-item" @click="goGoodsDetail(item._id)">
