@@ -1,61 +1,58 @@
 <template>
   <view class="app-container-no-padding">
-    <!-- 头部用户信息区域 -->
-    <view class="app-card user-header" @click="goUserInfo">
-      <image class="avatar" :src="avatarUrl" mode="aspectFill"></image>
-      <view class="user-info">
-        <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
-        <text class="phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
+    <!-- 头部用户信息横幅 -->
+    <view class="app-user-banner" @click="goUserInfo">
+      <image class="app-user-banner-avatar" :src="avatarUrl" mode="aspectFill"></image>
+      <view class="app-user-banner-info">
+        <text class="app-user-banner-name">{{ userInfo.nickname || '未设置昵称' }}</text>
+        <text class="app-user-banner-phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
       </view>
-      <uni-icons type="arrowright" size="20" color="#999"></uni-icons>
+      <uni-icons type="arrowright" size="20" color="rgba(255,255,255,0.8)"></uni-icons>
     </view>
 
-    <!-- 积分统计卡片 -->
-    <view class="app-card score-section">
-      <view class="score-item">
-        <text class="score-label">已获积分</text>
-        <text class="score-value app-text-price">{{ formatPrice(userScore) }}</text>
+    <!-- 积分统计面板 -->
+    <view class="app-score-board">
+      <view class="app-score-board-item">
+        <text class="app-score-board-value">{{ formatPrice(userScore) }}</text>
+        <text class="app-score-board-label">已获积分</text>
       </view>
-      <view class="score-item">
-        <text class="score-label">待获积分</text>
-        <text class="score-value app-text-price">{{ formatPrice(pendingScore) }}</text>
+      <view class="app-score-board-item">
+        <text class="app-score-board-value">{{ formatPrice(pendingScore) }}</text>
+        <text class="app-score-board-label">待获积分</text>
       </view>
     </view>
 
-    <!-- 订单状态卡片区域 -->
-    <view class="app-card order-status-section">
-      <view v-for="(card, idx) in orderStatusCards" :key="idx"
-        class="order-status-card"
-        :style="{ backgroundColor: card.bgColor }"
-        @click="goOrderList(card.status)">
-        <view class="card-left">
-          <uni-icons :type="card.icon" size="24" :color="card.iconColor"></uni-icons>
-        </view>
-        <view class="card-center">
-          <text class="status-label">{{ card.label }}</text>
-        </view>
-        <view class="card-right">
-          <text class="status-count app-text-primary">{{ orderCount[card.key] || 0 }}</text>
+    <!-- 订单状态网格 -->
+    <view class="app-card" style="margin: 10px; border-radius: 12px;">
+      <view class="app-status-grid">
+        <view v-for="(card, idx) in orderStatusCards" :key="idx"
+          class="app-status-grid-item"
+          @click="goOrderList(card.status)">
+          <view class="app-status-grid-icon" :style="{ backgroundColor: card.bgColor }">
+            <uni-icons :type="card.icon" size="22" :color="card.iconColor"></uni-icons>
+          </view>
+          <text v-if="orderCount[card.key] > 0" class="app-status-grid-badge">{{ orderCount[card.key] }}</text>
+          <text class="app-status-grid-label">{{ card.label }}</text>
         </view>
       </view>
     </view>
 
-    <!-- 自定义列表项 -->
-    <view class="app-card">
-      <view class="app-list-item" @click="goInfo">
-        <text>个人信息（含收货地址管理）</text>
+    <!-- 功能菜单列表 -->
+    <view class="app-card" style="margin: 10px; border-radius: 12px; padding: 0;">
+      <view class="app-menu-list-item" @click="goInfo">
+        <text class="app-menu-list-text">个人信息（含收货地址管理）</text>
         <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
       </view>
-      <view class="app-list-item" @click="goExchange">
-        <text>积分兑换</text>
+      <view class="app-menu-list-item" @click="goExchange">
+        <text class="app-menu-list-text">积分兑换</text>
         <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
       </view>
-      <view class="app-list-item" @click="goExchangeRecords">
-        <text>兑换记录</text>
+      <view class="app-menu-list-item" @click="goExchangeRecords">
+        <text class="app-menu-list-text">兑换记录</text>
         <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
       </view>
-      <view v-if="isAdmin" class="app-list-item" @click="goAdminPanel">
-        <text>管理后台（管理员后台操作入口）</text>
+      <view v-if="isAdmin" class="app-menu-list-item" @click="goAdminPanel">
+        <text class="app-menu-list-text">管理后台</text>
         <uni-icons type="arrowright" size="16" color="#999"></uni-icons>
       </view>
     </view>
@@ -78,13 +75,12 @@ export default {
       pendingScore: 0,
       userScore: 0,
       orderStatusCards: [
-        { key: 'all', status: undefined, label: '全部订单', icon: 'list', iconColor: '#007aff', bgColor: '#f9f9f9' },
+        { key: 'all', status: undefined, label: '全部', icon: 'list', iconColor: '#607d8b', bgColor: '#f5f7fa' },
         { key: 'status0', status: 0, label: '待处理', icon: 'paperplane', iconColor: '#ff9800', bgColor: '#fff3e0' },
-		{ key: 'status4', status: 4, label: '已出单', icon: '', iconColor: '#f44336', bgColor: '#fbe9e7' },
+        { key: 'status4', status: 4, label: '已出单', icon: 'compose', iconColor: '#ff5722', bgColor: '#fbe9e7' },
         { key: 'status1', status: 1, label: '配送中', icon: 'upload', iconColor: '#2196f3', bgColor: '#e3f2fd' },
         { key: 'status2', status: 2, label: '已收货', icon: 'checkmarkempty', iconColor: '#4caf50', bgColor: '#e8f5e8' },
-        { key: 'status3', status: 3, label: '已取消', icon: 'close', iconColor: '#f44336', bgColor: '#fbe9e7' },
-		
+        { key: 'status3', status: 3, label: '已取消', icon: 'close', iconColor: '#9e9e9e', bgColor: '#f5f5f5' }
       ]
     };
   },
@@ -190,90 +186,6 @@ export default {
 </script>
 
 <style scoped>
-.user-header {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  margin-bottom: 10px;
-}
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-  margin-right: 15px;
-  background-color: #f0f0f0;
-}
-.user-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.nickname {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-.phone {
-  font-size: 14px;
-  color: #999;
-  margin-top: 5px;
-}
-.score-section {
-  display: flex;
-  padding: 15px 20px;
-  margin-bottom: 6px;
-  justify-content: space-around;
-}
-.score-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.score-label {
-  font-size: 14px;
-  color: #666;
-}
-.score-value {
-  font-size: 20px;
-  margin-top: 5px;
-}
-.order-status-section {
-  padding: 6px;
-  margin-bottom: 6px;
-}
-.order-status-card {
-  display: flex;
-  align-items: center;
-  height: 16px;
-  padding: 12px 10px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  border: 1px solid #eee;
-  transition: background-color 0.2s;
-}
-.order-status-card:active {
-  background-color: #e0e0e0;
-}
-.card-left {
-  width: 40px;
-  display: flex;
-  justify-content: center;
-  margin-right: 10px;
-}
-.card-center {
-  flex: 1;
-}
-.status-label {
-  font-size: 16px;
-  color: #333;
-}
-.card-right {
-  width: 50px;
-  text-align: right;
-}
-.status-count {
-  font-size: 20px;
-}
 .logout-btn {
   margin: 30px 20px;
   border-radius: 8px;

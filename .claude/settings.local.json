@@ -5,7 +5,9 @@
       "Bash(rm *)",
       "Bash(find ./uniCloud-aliyun/cloudfunctions -name \"index.js\" -exec wc -l {} \\\\;)",
       "Bash(awk '{sum+=$1} END {print \"Total lines:\", sum}')",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(sass --no-source-map common/app.scss /dev/null)",
+      "Bash(python3 *)"
     ]
   }
 }

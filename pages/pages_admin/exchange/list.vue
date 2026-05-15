@@ -1,25 +1,25 @@
 <template>
   <view class="page-container">
 	  <!-- 顶部工具栏 -->
-	  <view class="toolbar">
+	  <view class="app-admin-toolbar">
 	    <view class="filter-menu">
 	      <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
-	        <view class="picker">
+	        <view class="app-admin-picker">
 	          {{ statusOptions[statusIndex] }}
-	          <text class="uni-icon uni-icon-arrowdown">▼</text>
+	          <text class="uni-icon app-admin-picker-arrow">▼</text>
 	        </view>
 	      </picker>
 	    </view>
-	    <view class="search-box">
+	    <view class="app-admin-search-box">
 	      <input
-	        class="search-input"
+	        class="app-admin-search-input"
 	        type="text"
 	        v-model="searchInput"
 	        placeholder="输入物品名称"
 	        confirm-type="search"
 	        @confirm="onSearch"
 	      />
-	      <button class="search-btn" type="default" size="mini" @click="onSearch">搜索</button>
+	      <button class="app-admin-search-btn" type="default" size="mini" @click="onSearch">搜索</button>
 	    </view>
 	  </view>
 	  
@@ -44,13 +44,12 @@
         :page-size="20"
         :manual="true"
       >
-        <view v-if="error" class="error">{{ error.message }}</view>
+        <view v-if="error" class="app-error">{{ error.message }}</view>
         <view v-else-if="data && data.length > 0" class="goods-list">
           <view v-for="item in data" :key="item._id" class="goods-card">
-           
-            <image class="goods-image" :src="item.image || '/static/tab/goods-default.png'" mode="aspectFill" />
+            <image class="app-goods-image" :src="item.image || '/static/tab/goods-default.png'" mode="aspectFill" />
             <!-- 中间信息区域 -->
-            <view class="goods-info">
+            <view class="app-goods-info">
               <view class="info-header">
                 <text class="name">{{ item.name }}</text>
               </view>
@@ -69,7 +68,7 @@
             </view>
           </view>
         </view>
-        <view v-else-if="!loading" class="empty">暂无兑换物品</view>
+        <view v-else-if="!loading" class="app-empty">暂无兑换物品</view>
         <uni-load-more :status="loading ? 'loading' : (hasMore ? 'more' : 'noMore')" />
       </unicloud-db>
     </scroll-view>
@@ -228,72 +227,10 @@ export default {
   height: 100vh;  
 }
 .list-scroll {
-	flex: 0.92;
-	overflow-y: auto;          
+	flex: 1;
+	overflow-y: auto;
   /* height: 100%; */
   background-color: #f8f8f8;
-}
-.toolbar {
-  display: flex;
-  align-items: center;
-  margin: 10px;
-  background-color: #fff;
-  padding: 8px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.filter-menu {
-  flex-shrink: 0;
-  margin-right: 10px;
-  font-size: 16px;
-}
-.picker {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background-color: #f9f9f9;
-}
-.uni-icon-arrowdown {
-  margin-left: 4px;
-  font-size: 14px;
-  color: #666;
-}
-.search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-.search-input {
-  flex: 1;
-  height: 36px;
-  border: 1px solid #ddd;
-  border-radius: 20px 0 0 20px;
-  padding: 0 12px;
-  font-size: 14px;
-  background-color: #f5f5f5;
-}
-.search-btn {
-  flex-shrink: 0;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 0 20px 20px 0;
-  margin-left: -1px;
-  font-size: 14px;
-  background-color: #007aff;
-  color: #fff;
-  border: none;
-}
-.error {
-  padding: 20px;
-  text-align: center;
-  color: #ff5500;
-}
-.empty {
-  text-align: center;
-  padding: 20px;
-  color: #999;
 }
 .goods-list {
   padding: 0 10px;
@@ -307,26 +244,10 @@ export default {
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   transition: all 0.2s;
-  flex-wrap: nowrap; /* 禁止换行 */
+  flex-wrap: nowrap;
 }
 .goods-card:active {
   transform: scale(0.98);
-}
-.goods-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  background-color: #f5f5f5;
-  margin-right: 12px;
-  object-fit: cover;
-  flex-shrink: 0; /* 图片不压缩 */
-}
-.goods-info {
-  flex: 1;
-  min-width: 0; /* 允许内容截断 */
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 .info-header {
   display: flex;

@@ -1,12 +1,20 @@
 <template>
 	<view class="page-container">
 	<!-- 顶部筛选行 -->
-	<view class="filter-row">
+	<view class="app-admin-toolbar">
 	  <view class="filter-menu">
 	    <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
-	      <view class="picker">
+	      <view class="app-admin-picker">
 	        {{ statusOptions[statusIndex] }}
-	        <text class="uni-icon uni-icon-arrowdown">▼</text>
+	        <text class="uni-icon app-admin-picker-arrow">▼</text>
+	      </view>
+	    </picker>
+	  </view>
+	  <view class="filter-menu">
+	    <picker @change="onStreetFilterChange" :value="streetIndex" :range="streetOptions">
+	      <view class="app-admin-picker">
+	        {{ streetOptions[streetIndex] }}
+	        <text class="uni-icon app-admin-picker-arrow">▼</text>
 	      </view>
 	    </picker>
 	  </view>
@@ -33,52 +41,46 @@
       :page-size="20"
       :manual="true"
     >
-      <view v-if="error" class="error">{{ error.message }}</view>
-      <view v-else-if="loading" class="loading">加载中...</view>
+      <view v-if="error" class="app-error">{{ error.message }}</view>
+      <view v-else-if="loading" class="app-loading">加载中...</view>
       <view v-else-if="data && data.length > 0" class="order-list">
-        <view v-for="item in data" :key="item._id" class="order-item">
-          <view class="order-header">
-            <text class="order-pre">{{ getOrderIsPreText(item.is_pre_order) }}</text>
-            <text class="order-no">订单号：{{ item.order_no }}</text>
-            <text class="order-status" :class="'status-' + item.status">{{ getStatusText(item) }}</text>
+        <view v-for="item in data" :key="item._id" class="app-order-card">
+          <view class="app-order-header">
+            <text class="app-order-pre">{{ getOrderIsPreText(item.is_pre_order) }}</text>
+            <text class="app-order-no">订单号：{{ item.order_no }}</text>
+            <text class="app-status-tag" :class="'app-status-' + item.status">{{ getStatusText(item) }}</text>
           </view>
-          <view class="address-info">
+          <view class="app-order-address">
             <text>收货人：{{ item.user_address.user_name}} ;电话：{{ item.user_address.mobile }}</text>
             <text>地址：{{ item.user_address.formatted_address }}</text>
-			<text>地址别名：{{ item.user_address.alias || '-' }}</text>
-			<text>备注：{{item.remark || "-"}}</text>
-			<text>创建时间:{{formatDate(item.create_date)}}<!-- ;修改:{{formatDate(item.update_date)}} --></text>
+            <text>地址别名：{{ item.user_address.alias || '-' }}</text>
+            <text>备注：{{item.remark || "-"}}</text>
+            <text>创建时间:{{formatDate(item.create_date)}}</text>
           </view>
           <view class="goods-list">
             <view v-for="(good, index) in item.goods_list" :key="index" class="goods-item">
               <view class="goods-info">
-                <text class="goods-name">{{ good.name }}</text>
-                <text class="goods-standard">{{ good.standard }}</text>
-                <text class="goods-price">¥{{ formatPrice(good.price)}} x {{ good.count }}</text>
+                <text class="app-goods-name">{{ good.name }}</text>
+                <text class="app-goods-standard">{{ good.standard }}</text>
+                <text class="app-goods-price-sm">¥{{ formatPrice(good.price)}} x {{ good.count }}</text>
               </view>
             </view>
           </view>
-          <view class="order-footer">
+          <view class="app-order-footer">
             <text class="total">合计：¥{{ formatPrice(item.total_amount)}}</text>
             <text class="score">积分：{{ formatPrice(item.score_earned) }}</text>
           </view>
-          <view class="action-buttons">
-			<button v-if="item.status === 0" class="action-btn pdf" size="mini" @click="createOrderPdf(item._id)">出单</button>
-            <button v-if="item.status === 0" class="action-btn edit" size="mini" @click="editOrder(item._id)">修改</button>
-            <button v-if="item.status === 0 || item.status === 1|| item.status === 4" class="action-btn cancel" size="mini" @click="confirmCancel(item)">取消</button>	
-			
-			
-			<button v-if="item.status === 4" class="action-btn ship" size="mini" @click="confirmShip(item)">发货</button>	
-			
-   
-			
-			
-			<button v-if="item.pdf_file_url && item.status === 4" class="action-btn print" size="mini" @click="printOrderPdf(item.pdf_file_url)">打印</button>	  
-            <button v-if="item.status === 1" class="action-btn complete" size="mini" @click="confirmComplete(item)">完成</button>
+          <view class="app-order-actions">
+            <button v-if="item.status === 0" class="app-action-btn app-action-btn-pdf" size="mini" @click="createOrderPdf(item._id)">出单</button>
+            <button v-if="item.status === 0" class="app-action-btn app-action-btn-edit" size="mini" @click="editOrder(item._id)">修改</button>
+            <button v-if="item.status === 0 || item.status === 1|| item.status === 4" class="app-action-btn app-action-btn-cancel" size="mini" @click="confirmCancel(item)">取消</button>
+            <button v-if="item.status === 4" class="app-action-btn app-action-btn-ship" size="mini" @click="confirmShip(item)">发货</button>
+            <button v-if="item.pdf_file_url && item.status === 4" class="app-action-btn app-action-btn-print" size="mini" @click="printOrderPdf(item.pdf_file_url)">打印</button>
+            <button v-if="item.status === 1" class="app-action-btn app-action-btn-complete" size="mini" @click="confirmComplete(item)">完成</button>
           </view>
         </view>
       </view>
-      <view v-else class="empty">暂无订单</view>
+      <view v-else class="app-empty">暂无订单</view>
       <uni-load-more :status="loading ? 'loading' : (hasMore ? 'more' : 'noMore')" />
     </unicloud-db>
   </scroll-view>
@@ -97,6 +99,12 @@ export default {
       statusFilter: null, // null 表示全部，0,1,2,3 分别对应各状态
       statusOptions: ['全部订单', '待处理', '配送中', '已收货', '已取消', '已出单'],
       statusIndex: 0,
+      // 地区筛选
+      regionStatic: { provinces: [], cities: {}, districts: {}, streets: {} },
+      streetFilter: null,
+      streetIndex: 0,
+      streetOptions: ['全部地区'],
+      allStreets: [],
       // 定时刷新相关
       refreshTimer: null,
       refreshInterval: 10000, // 30秒刷新一次
@@ -105,15 +113,20 @@ export default {
   },
   computed: {
     whereCondition() {
-      const condition = {};
+      const conditions = [];
       if (this.statusFilter !== null) {
-        condition.status = this.statusFilter;
+        conditions.push(`status == ${this.statusFilter}`);
       }
-	   console.log('当前查询条件:', condition); // 调试用
-      return condition;
+      if (this.streetFilter) {
+        conditions.push(`user_address.street_code == "${this.streetFilter}"`);
+      }
+      console.log('当前查询条件:', conditions);
+      if (conditions.length === 0) return '';
+      return conditions.join(' && ');
     }
   },
   onLoad(options) {
+    this.loadRegionConfig();
     if (options.status !== undefined) {
       const status = parseInt(options.status, 10);
       if (status >= 0 && status <= 4) {
@@ -236,6 +249,36 @@ export default {
        this.statusIndex = Number(e.detail.value); // 转为数字
       // 不立即刷新，等待确认按钮触发
     },
+    onStreetFilterChange(e) {
+      this.streetIndex = Number(e.detail.value);
+    },
+    async loadRegionConfig() {
+      let config = uni.getStorageSync('regionConfig');
+      try {
+        const res = await db.collection('app-region-config').limit(1).get();
+        if (res.result.data && res.result.data.length > 0) {
+          const data = res.result.data[0];
+          config = {
+            provinces: data.provinces || [],
+            cities: data.cities || {},
+            districts: data.districts || {},
+            streets: data.streets || {}
+          };
+          uni.setStorageSync('regionConfig', config);
+        }
+      } catch (err) {
+        console.error('加载区域配置失败', err);
+      }
+      if (config && config.streets) {
+        this.regionStatic = config;
+        const allStreets = [];
+        Object.values(config.streets).forEach(list => {
+          if (Array.isArray(list)) allStreets.push(...list);
+        });
+        this.allStreets = allStreets;
+        this.streetOptions = ['全部地区', ...allStreets.map(s => s.name)];
+      }
+    },
     applyFilter() {
       const value = Number(this.statusIndex); // 确保为数字
       if (value === 0) {
@@ -243,8 +286,14 @@ export default {
       } else {
         this.statusFilter = value - 1; // 1->0, 2->1, 3->2, 4->3
       }
-	   console.log('statusFilter =', this.statusFilter); // 查看是否变为 null
-	   this.refreshKey++;
+      const streetValue = Number(this.streetIndex);
+      if (streetValue === 0) {
+        this.streetFilter = null;
+      } else {
+        this.streetFilter = this.allStreets[streetValue - 1] ? this.allStreets[streetValue - 1].code : null;
+      }
+      console.log('statusFilter =', this.statusFilter, 'streetFilter =', this.streetFilter);
+      this.refreshKey++;
       //this.$refs.udb && this.$refs.udb.loadData({ clear: true });
     },
     onRefresh() {
@@ -457,17 +506,10 @@ export default {
 	  height: 100vh;
 }
 .order-list-scroll {
-  flex: 0.92;
+  flex: 1;
   	overflow-y: auto;
   /* height: 100%; */
   background-color: #f5f5f5;
-}
-.filter-row {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #fff;
-  margin-bottom: 6px;
 }
 .filter-menu {
   flex: 1;
@@ -481,49 +523,13 @@ export default {
   font-size: 14px;
   padding: 0 15px;
 }
-.picker {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background-color: #f9f9f9;
-}
-.uni-icon-arrowdown {
-  margin-left: 4px;
-  font-size: 14px;
-  color: #666;
-}
-
 .order-list { padding: 10px; }
-.order-item { background-color: #fff; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.order-no { font-size: 12px; color: #999; }
-.order-status { font-size: 12px; font-weight: bold; }
-.status-0 { color: #ff9800; }
-.status-1 { color: #2196f3; }
-.status-2 { color: #4caf50; }
-.status-3 { color: #999; }
-.order-pre { font-size: 12px; font-weight: bold;color: #55aaff; }
-
-.address-info { font-size: 13px; color: #666; margin-bottom: 8px; }
-.address-info text { display: block; }
 .goods-list { margin-bottom: 8px; }
 .goods-item { display: flex; margin-bottom: 8px; }
-.goods-image { width: 50px; height: 50px; border-radius: 4px; margin-right: 8px; }
 .goods-info { flex: 1; }
 .goods-name { font-size: 14px; }
 .goods-standard { font-size: 12px; color: #999; }
 .goods-price { font-size: 12px; color: #ff6000; }
-.order-footer { display: flex; justify-content: space-between; margin-top: 8px; font-size: 14px; }
 .total { color: #333; }
 .score { color: #666; }
-.action-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
-.action-btn { font-size: 12px; padding: 4px 12px; border-radius: 4px; margin: 0; }
-.edit { background-color: #2196f3; color: #fff; }
-.cancel { background-color: #ff9800; color: #fff; }
-.ship { background-color: #4caf50; color: #fff; }
-.print { background-color: #607d8b; color: #fff; }
-.complete { background-color: #9c27b0; color: #fff; }
-.error, .loading, .empty { text-align: center; padding: 20px; color: #999; }
 </style>

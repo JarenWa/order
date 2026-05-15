@@ -68,54 +68,12 @@ export default {
         address: '',
         is_default: true
       },
-      // 静态行政区划数据
+      // 行政区划数据，从云端配置加载
       regionStatic: {
-        provinces: [
-          { code: '51', name: '四川省' },
-          // { code: '50', name: '重庆市' }
-        ],
-        cities: {
-          '51': [{ code: '5117', name: '达州市' }],
-          '50': [{ code: '5001', name: '市辖区' }]
-        },
-        districts: {
-          '5117': [
-            // { code: '511703', name: '达川区' },
-            { code: '511723', name: '开江县' }
-          ],
-          '5001': [
-            { code: '500154', name: '开州区' },
-            { code: '500155', name: '梁平区' }
-          ]
-        },
-        streets: {
-          '511703': [
-            { code: '511703001', name: '三里坪街道' }
-            // ... 其他乡镇可补充
-          ],
-          '511723': [
-            { code: '511723001', name: '任市' },
-			 { code: '511723002', name: '广福' },
-			  { code: '511723003', name: '长岭' },
-			   { code: '511723004', name: '八庙' },
-			    { code: '511723005', name: '新街' },
-				 { code: '511723006', name: '靖安' },
-				  { code: '511723007', name: '甘棠' },
-				   { code: '511723008', name: '宝石' },
-				    { code: '511723009', name: '讲治' }
-					
-			
-            // ...
-          ],
-          '500154': [
-            { code: '500154001', name: '汉丰街道' }
-            // ...
-          ],
-          '500155': [
-            { code: '500155001', name: '梁山街道' }
-            // ...
-          ]
-        }
+        provinces: [],
+        cities: {},
+        districts: {},
+        streets: {}
       },
       // 当前显示的列数据
       regionColumns: [[], [], [], []],
@@ -156,9 +114,35 @@ export default {
     if (userInfo && userInfo.mobile) {
       this.formData.mobile = userInfo.mobile;
     }
-    this.loadRegionData();
+    this.loadRegionConfig();
   },
   methods: {
+    // 从云端加载区域配置
+    async loadRegionConfig() {
+      let config = uni.getStorageSync('regionConfig');
+      try {
+        const res = await db.collection('app-region-config').limit(1).get();
+        if (res.result.data && res.result.data.length > 0) {
+          const data = res.result.data[0];
+          config = {
+            provinces: data.provinces || [],
+            cities: data.cities || {},
+            districts: data.districts || {},
+            streets: data.streets || {}
+          };
+          uni.setStorageSync('regionConfig', config);
+        }
+      } catch (err) {
+        console.error('加载区域配置失败', err);
+      }
+      if (config && config.provinces) {
+        this.regionStatic = config;
+        this.loadRegionData();
+      } else {
+        uni.showToast({ title: '未找到区域配置', icon: 'none' });
+      }
+    },
+
     // 初始化加载省份
     loadRegionData() {
       if (this.regionStatic.provinces.length === 0) return;

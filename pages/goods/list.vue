@@ -1,36 +1,34 @@
 <template>
   <view class="page-container">
-    <!-- 顶部工具栏：第一行（状态筛选 + 搜索） -->
-    <view class="toolbar app-card-flat">
+    <!-- 顶部工具栏（标签 + 分类 + 搜索） -->
+    <view class="app-admin-toolbar">
       <view class="filter-menu">
         <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
-          <view class="picker">
+          <view class="app-admin-picker category-picker">
             {{ statusOptions[statusIndex] }}
-            <text class="uni-icon uni-icon-arrowdown">▼</text>
+            <text class="uni-icon app-admin-picker-arrow">▼</text>
           </view>
         </picker>
       </view>
-      <view class="search-box">
+      <view class="filter-menu">
+        <picker @change="onCategoryFilterChange" :value="categoryIndex" :range="categoryOptions" range-key="text">
+          <view class="app-admin-picker category-picker">
+            {{ categoryOptions[categoryIndex].text }}
+            <text class="uni-icon app-admin-picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      <view class="app-admin-search-box search-box">
         <input
-          class="search-input"
+          class="app-admin-search-input search-input"
           type="text"
           v-model="searchInput"
-          placeholder="输入商品名称"
+          placeholder="输入品名"
           confirm-type="search"
           @confirm="onSearch"
         />
-        <button class="search-btn" type="default" size="mini" @click="onSearch">搜索</button>
+        <button class="app-admin-search-btn search-btn" type="default" size="mini" @click="onSearch">搜索</button>
       </view>
-    </view>
-
-    <!-- 第二行：类别筛选菜单 -->
-    <view class="category-filter-row app-card-flat">
-      <picker @change="onCategoryFilterChange" :value="categoryIndex" :range="categoryOptions" range-key="text">
-        <view class="picker category-picker">
-          {{ categoryOptions[categoryIndex].text }}
-          <text class="uni-icon uni-icon-arrowdown">▼</text>
-        </view>
-      </picker>
     </view>
 
     <!-- 商品列表区域 -->
@@ -65,15 +63,15 @@
               <template v-slot:body>
                 <view class="item-content">
                   <image
-                    class="thumb"
+                    class="app-goods-image"
                     :src="getGoodsImage(item)"
                     @error="onImageError(item)"
                     mode="aspectFill"
                   />
-                  <view class="info">
+                  <view class="app-goods-info">
                     <text class="name">{{ item.name }}</text>
                     <view class="price-row">
-                      <text class="price app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
+                      <text class="app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
                       <text v-if="item.original_price && item.original_price > item.goods_price" class="app-original-price">¥{{ formatPrice(item.original_price) }}</text>
                       <text class="standard">规格:{{ item.standard|| ''}}</text>
                     </view>
@@ -89,8 +87,8 @@
                       <text v-if="!item.is_on_sale" class="app-tag app-tag-off">下架</text>
                     </view>
                   </view>
-                  <view class="cart-add" @click.stop="showAddToCart(item)">
-                    <uni-icons type="plusempty" size="20" color="#ffffff"></uni-icons>
+                  <view class="app-cart-btn" @click.stop="showAddToCart(item)">
+                    <uni-icons type="plusempty" size="18" color="#ffffff"></uni-icons>
                   </view>
                 </view>
               </template>
@@ -358,9 +356,11 @@ page {
   flex-direction: column;
   overflow: hidden;
 }
-.toolbar,
-.category-filter-row {
+.app-admin-toolbar {
   flex-shrink: 0;
+}
+.filter-menu {
+  
 }
 .list-scroll {
   flex: 1;
@@ -369,64 +369,37 @@ page {
   background-color: #f8f8f8;
   width: 100%;
 }
-.picker {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background-color: #f9f9f9;
-}
-.toolbar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-  padding: 8px 10px;
-}
-.filter-menu {
-  flex-shrink: 0;
-  margin-right: 10px;
-  font-size: 16px;
-}
-.uni-icon-arrowdown {
-  margin-left: 4px;
-  font-size: 14px;
-  color: #666;
+.category-picker {
+  font-size: 12px;
 }
 .search-box {
   flex: 1;
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0; /* 关键：允许flex子项收缩 */
 }
-.search-input {
-  flex: 1;
-  height: 36px;
-  border: 1px solid #ddd;
-  border-radius: 20px 0 0 20px;
-  padding: 0 12px;
-  font-size: 14px;
-  background-color: #f5f5f5;
+.search-input{
+	 flex: 1;
+	  height: 32px;
+	  padding: 0 12px;
+	  background-color: #f5f5f5;
+	  border-radius: 16px;
+	  font-size: 13px;
+	  color: #333;
+	  border: none;
 }
-.search-btn {
-  flex-shrink: 0;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 0 20px 20px 0;
-  margin-left: -1px;
-  font-size: 14px;
-  background-color: #007aff;
-  color: #fff;
-  border: none;
-}
-.category-filter-row {
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 8px 10px;
-}
-.category-picker {
-  width: 100%;
-  justify-content: center;
-  font-size: 16px;
+.search-btn{
+	 flex-shrink: 0;
+	  height: 32px;
+	  line-height: 32px;
+	  padding: 0 14px;
+	  margin: 0;
+	  background-color: #007aff;
+	  color: #fff;
+	  font-size: 13px;
+	  border-radius: 16px;
+	  border: none;
 }
 .item-content {
   display: flex;
@@ -434,20 +407,7 @@ page {
   width: 100%;
   position: relative;
 }
-.thumb {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  margin-right: 12px;
-  background-color: #f5f5f5;
-  flex-shrink: 0;
-}
-.info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.info .name {
+.name {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 4px;
@@ -457,9 +417,6 @@ page {
   display: flex;
   align-items: center;
   margin-bottom: 4px;
-}
-.info .price {
-  font-size: 16px;
 }
 .standard {
   font-size: 13px;
@@ -480,20 +437,6 @@ page {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-.cart-add {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 44px;
-  height: 44px;
-  background-color: rgba(0, 122, 255, 0.5);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  z-index: 2;
 }
 .stock-info {
   text-align: center;

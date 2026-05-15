@@ -245,8 +245,13 @@
 		      "style": {
 		        "navigationBarTitleText": "物品详情"
 		      }
+		    },
+		    {
+		      "path": "region-config/edit",
+		      "style": {
+		        "navigationBarTitleText": "区域管理"
+		      }
 		    }
-       
       ]
     }
   ],

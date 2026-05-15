@@ -10,10 +10,10 @@
       <view v-if="error" class="app-error">{{ error.message }}</view>
       <view v-else-if="loading" class="app-loading">加载中...</view>
       <view v-else-if="data && data.length > 0" class="order-list">
-        <view v-for="item in data" :key="item._id" class="app-card-flat order-item">
-          <view class="order-header" @click="goDetail(item._id)">
-            <text v-if="item.is_pre_order" class="order-pre">预售订单</text>
-            <text class="order-no">订单号：{{ item.order_no }}</text>
+        <view v-for="item in data" :key="item._id" class="app-order-card">
+          <view class="app-order-header" @click="goDetail(item._id)">
+            <text v-if="item.is_pre_order" class="app-order-pre">预售订单</text>
+            <text class="app-order-no">订单号：{{ item.order_no }}</text>
             <text class="app-status-tag" :class="'app-status-' + item.status">{{ getStatusText(item) }}</text>
           </view>
           <view class="order-date app-text-grey">创建时间：{{ formatDate(item.create_date) }}</view>
@@ -30,11 +30,11 @@
             <text class="total">共 {{ item.goods_list.length }} 件 合计 ¥{{ formatPrice(item.total_amount) }}</text>
           </view>
 
-          <view class="action-buttons">
-            <button v-if="item.status === 0 || item.status === 4" class="action-btn cancel" size="mini" @click="confirmCancel(item._id)">取消</button>
-            <button v-if="item.status === 0" class="action-btn edit" size="mini" @click="editOrder(item._id)">修改</button>
-            <button v-if="item.status === 1" class="action-btn confirm" size="mini" @click="confirmReceive(item._id)">确认收货</button>
-            <button v-if="item.status === 3" class="action-btn delete" size="mini" @click="confirmDelete(item._id)">删除</button>
+          <view class="app-order-actions">
+            <button v-if="item.status === 0 || item.status === 4" class="app-action-btn app-action-btn-cancel" size="mini" @click="confirmCancel(item._id)">取消</button>
+            <button v-if="item.status === 0" class="app-action-btn app-action-btn-edit" size="mini" @click="editOrder(item._id)">修改</button>
+            <button v-if="item.status === 1" class="app-action-btn app-action-btn-confirm" size="mini" @click="confirmReceive(item._id)">确认收货</button>
+            <button v-if="item.status === 3" class="app-action-btn app-action-btn-delete" size="mini" @click="confirmDelete(item._id)">删除</button>
           </view>
         </view>
       </view>
@@ -196,30 +196,8 @@ export default {
 </script>
 
 <style scoped>
-.order-item { padding: 12px; margin-bottom: 10px; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 10px; cursor: pointer; }
-.order-no { font-size: 12px; color: #999; }
-.order-pre { font-size: 12px; font-weight: bold; color: #55aaff; }
-.order-date { font-size: 12px; margin-bottom: 8px; }
-.goods-list { margin-bottom: 8px; cursor: pointer; }
+.order-date { margin-bottom: 8px; display: block; }
+.goods-list { margin-bottom: 8px; }
 .order-footer { margin-top: 8px; text-align: right; }
 .total { font-size: 14px; color: #333; }
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid #eee;
-}
-.action-btn {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  margin: 0;
-}
-.action-btn.cancel { background-color: #ff9800; color: #fff; border: none; }
-.action-btn.edit { background-color: #2196f3; color: #fff; border: none; }
-.action-btn.confirm { background-color: #4caf50; color: #fff; border: none; }
-.action-btn.delete { background-color: #f44336; color: #fff; border: none; }
 </style>

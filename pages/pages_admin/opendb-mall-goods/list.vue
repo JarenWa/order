@@ -1,37 +1,37 @@
 <template>
   <view class="page-container">
     <!-- 顶部工具栏：第一行（状态筛选 + 搜索） -->
-    <view class="toolbar">
+    <view class="app-admin-toolbar">
       <view class="filter-menu">
         <picker @change="onStatusFilterChange" :value="statusIndex" :range="statusOptions">
-          <view class="picker">
+          <view class="app-admin-picker">
             {{ statusOptions[statusIndex] }}
-            <text class="uni-icon uni-icon-arrowdown">▼</text>
+            <text class="uni-icon app-admin-picker-arrow">▼</text>
           </view>
         </picker>
       </view>
-      <view class="search-box">
+      <view class="app-admin-search-box">
         <input
-          class="search-input"
+          class="app-admin-search-input"
           type="text"
           v-model="searchInput"
           placeholder="输入商品名称"
           confirm-type="search"
           @confirm="onSearch"
         />
-        <button class="search-btn" type="default" size="mini" @click="onSearch">搜索</button>
+        <button class="app-admin-search-btn" type="default" size="mini" @click="onSearch">搜索</button>
       </view>
     </view>
 
     <!-- 第二行：类别筛选菜单 -->
-    <view class="category-filter-row">
+    <view class="app-admin-filter-row">
       <button type="default" size="mini" @click="setCategory">
         <text>设置分类</text>
       </button>
       <picker @change="onCategoryFilterChange" :value="categoryIndex" :range="categoryOptions" range-key="text">
-        <view class="picker category-picker">
+        <view class="app-admin-picker category-picker">
           {{ categoryOptions[categoryIndex].text }}
-          <text class="uni-icon uni-icon-arrowdown">▼</text>
+          <text class="uni-icon app-admin-picker-arrow">▼</text>
         </view>
       </picker>
     </view>
@@ -69,17 +69,17 @@
               <template v-slot:body>
                 <view class="item-content">
                   <image
-                    class="thumb"
+                    class="app-goods-image"
                     :src="getImageSrc(item)"
                     @error="onImageError(item)"
                     mode="aspectFill"
                   />
-                  <view class="info">
+                  <view class="app-goods-info">
                     <text class="name">{{ item.name }}</text>
                     <text class="sku">货号:{{ item.sku || '-' }}</text>
                     <text class="price-row">
-                      <text class="price">¥{{ formatPrice(item.goods_price) }}</text>
-                      <text v-if="item.original_price" class="original-price">¥{{ formatPrice(item.original_price) }}</text>
+                      <text class="app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
+                      <text v-if="item.original_price" class="app-original-price">¥{{ formatPrice(item.original_price) }}</text>
                     </text>
                     <text class="detail">
                       库存:{{ item.remain_count }}
@@ -91,10 +91,10 @@
                     <text v-if="item.goods_remark" class="remark">备注:{{ item.goods_remark }}</text>
                     <view class="tags-row">
                       <view class="tags">
-                        <text v-if="item.is_hot" class="tag hot">热销</text>
-                        <text v-if="item.is_new" class="tag new">新品</text>
-                        <text v-if="!item.is_on_sale" class="tag off">下架</text>
-                        <text v-if="item.is_pre" class="tag pre">预售</text>
+                        <text v-if="item.is_hot" class="app-tag app-tag-hot">热销</text>
+                        <text v-if="item.is_new" class="app-tag app-tag-new">新品</text>
+                        <text v-if="!item.is_on_sale" class="app-tag app-tag-off">下架</text>
+                        <text v-if="item.is_pre" class="app-tag app-tag-pre">预售</text>
                       </view>
                       <view class="action-btns">
                         <button class="action-btn inbound" size="mini" @click.stop="openFlowDialog(item, 'inbound')">入库</button>
@@ -130,38 +130,38 @@
 
         <!-- 入库表单 -->
         <block v-if="flowType === 'inbound'">
-          <view class="popup-item">
-            <text class="label required">入库数量</text>
-            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label app-popup-form-label-required">入库数量</text>
+            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
           </view>
-          <view class="popup-item">
-            <text class="label">生产日期</text>
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label">生产日期</text>
             <picker mode="date" fields="month" :value="flowForm.production_date" @change="onFlowDateChange">
-              <view class="picker-date">{{ flowForm.production_date || '请选择年月' }}</view>
+              <view class="app-popup-form-picker">{{ flowForm.production_date || '请选择年月' }}</view>
             </picker>
           </view>
-          <view class="popup-item">
-            <text class="label">成本单价(元)</text>
-            <input class="input" type="digit" v-model="flowForm.unit_cost_yuan" placeholder="可选" />
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label">成本单价(元)</text>
+            <input class="app-popup-form-input" type="digit" v-model="flowForm.unit_cost_yuan" placeholder="可选" />
           </view>
-          <view class="popup-item">
-            <text class="label">批次号</text>
-            <input class="input" v-model="flowForm.batch_no" placeholder="不填自动生成" />
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label">批次号</text>
+            <input class="app-popup-form-input" v-model="flowForm.batch_no" placeholder="不填自动生成" />
           </view>
         </block>
 
         <!-- 盘点表单 -->
         <block v-if="flowType === 'check'">
-          <view class="popup-item">
-            <text class="label required">实际库存</text>
-            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入实际库存数量" />
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label app-popup-form-label-required">实际库存</text>
+            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入实际库存数量" />
           </view>
         </block>
 
         <!-- 调整表单 -->
         <block v-if="flowType === 'adjust'">
-          <view class="popup-item">
-            <text class="label required">调整方式</text>
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label app-popup-form-label-required">调整方式</text>
             <view class="radio-group">
               <view class="radio-item" :class="{ active: flowForm.adjustType === 'add' }" @click="flowForm.adjustType = 'add'">
                 <text>增加</text>
@@ -171,16 +171,16 @@
               </view>
             </view>
           </view>
-          <view class="popup-item">
-            <text class="label required">调整数量</text>
-            <input class="input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
+          <view class="app-popup-form-item">
+            <text class="app-popup-form-label app-popup-form-label-required">调整数量</text>
+            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
           </view>
         </block>
 
         <!-- 公共备注 -->
-        <view class="popup-item">
-          <text class="label">备注</text>
-          <input class="input" v-model="flowForm.remark" placeholder="可选" />
+        <view class="app-popup-form-item">
+          <text class="app-popup-form-label">备注</text>
+          <input class="app-popup-form-input" v-model="flowForm.remark" placeholder="可选" />
         </view>
 
         <view class="popup-buttons">
@@ -421,102 +421,24 @@ export default {
   height: 100vh;
 }
 .list-scroll {
-  flex: 0.85;
+  flex: 1;
   overflow-y: auto;
   background-color: #f5f5f5;
-}
-.toolbar {
-  display: flex;
-  align-items: center;
-  margin: 10px;
-  background-color: #fff;
-  padding: 8px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .filter-menu {
   flex-shrink: 0;
   margin-right: 10px;
   font-size: 16px;
 }
-.picker {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background-color: #f9f9f9;
-}
-.uni-icon-arrowdown {
-  margin-left: 4px;
-  font-size: 14px;
-  color: #666;
-}
-.search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-.search-input {
-  flex: 1;
-  height: 36px;
-  border: 1px solid #ddd;
-  border-radius: 20px 0 0 20px;
-  padding: 0 12px;
-  font-size: 14px;
-  background-color: #f5f5f5;
-}
-.search-btn {
-  flex-shrink: 0;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 0 20px 20px 0;
-  margin-left: -1px;
-  font-size: 14px;
-  background-color: #007aff;
-  color: #fff;
-  border: none;
-}
-.category-filter-row {
-  margin: 0 10px 10px;
-  background-color: #fff;
-  padding: 8px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.category-filter-row button {
-  flex-shrink: 0;
-}
 .category-picker {
   flex: 1;
   justify-content: center;
   font-size: 16px;
 }
-.error {
-  padding: 20px;
-  text-align: center;
-  color: #ff5500;
-}
 .item-content {
   display: flex;
   align-items: flex-start;
   width: 100%;
-}
-.thumb {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  margin-right: 12px;
-  background-color: #f5f5f5;
-  flex-shrink: 0;
-}
-.info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 .name {
   font-size: 16px;
@@ -533,17 +455,6 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 2px;
-}
-.price {
-  font-size: 16px;
-  color: #ff6000;
-  font-weight: bold;
-  margin-right: 6px;
-}
-.original-price {
-  font-size: 13px;
-  color: #999;
-  text-decoration: line-through;
 }
 .detail {
   font-size: 13px;
@@ -572,17 +483,6 @@ export default {
   flex-wrap: wrap;
   gap: 6px;
 }
-.tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  color: #fff;
-  display: inline-block;
-}
-.hot { background-color: #f37b1d; }
-.new { background-color: #4caf50; }
-.off { background-color: #999; }
-.pre { background-color: #9c27b0; }
 .action-btns {
   display: flex;
   gap: 6px;
@@ -630,37 +530,6 @@ export default {
   color: #666;
   margin-top: 2px;
   display: block;
-}
-.popup-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.popup-item .label {
-  width: 80px;
-  font-size: 14px;
-  color: #333;
-  flex-shrink: 0;
-}
-.popup-item .label.required::before {
-  content: '* ';
-  color: #f44336;
-}
-.popup-item .input {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 14px;
-}
-.picker-date {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 14px;
-  background-color: #f9f9f9;
-  text-align: center;
 }
 .radio-group {
   flex: 1;

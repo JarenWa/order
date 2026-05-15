@@ -1,0 +1,39 @@
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"provinces": {
+			"bsonType": "array",
+			"description": "省份列表",
+			"title": "省份列表"
+		},
+		"cities": {
+			"bsonType": "object",
+			"description": "城市映射表，key 为省编码",
+			"title": "城市映射"
+		},
+		"districts": {
+			"bsonType": "object",
+			"description": "区县映射表，key 为市编码",
+			"title": "区县映射"
+		},
+		"streets": {
+			"bsonType": "object",
+			"description": "街道映射表，key 为区县编码",
+			"title": "街道映射"
+		},
+		"update_date": {
+			"bsonType": "timestamp",
+			"description": "最后更新时间"
+		}
+	}
+}

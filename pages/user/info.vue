@@ -1,11 +1,11 @@
 <template>
   <view class="app-container-no-padding">
     <!-- 个人信息卡片 -->
-    <view class="app-card profile-card" @click="goToUserInfo">
-      <image class="avatar" :src="avatarUrl" mode="aspectFill"></image>
-      <view class="profile-text">
-        <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
-        <text class="phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
+    <view class="app-card user-header" @click="goToUserInfo">
+      <image class="app-avatar" :src="avatarUrl" mode="aspectFill"></image>
+      <view class="app-user-info">
+        <text class="app-nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
+        <text class="app-phone">{{ userInfo.mobile || '未绑定手机号[!请点击绑定]' }}</text>
       </view>
       <uni-icons type="arrowright" size="20" color="#999"></uni-icons>
     </view>
@@ -31,19 +31,19 @@
           <view
             v-for="item in data"
             :key="item._id"
-            class="address-item"
-            :class="{ default: item.is_default }"
+            class="app-address-item"
+            :class="{ 'app-address-item-default': item.is_default }"
           >
-            <view class="address-info">
-              <view class="name-tag">
+            <view class="app-address-info">
+              <view class="app-address-name-tag">
                 <text class="name">{{ item.name }}</text>
-                <text class="tag" v-if="item.alias">{{ item.alias }}</text>
-                <text class="default-badge" v-if="item.is_default">默认</text>
+                <text class="app-address-tag" v-if="item.alias">{{ item.alias }}</text>
+                <text class="app-address-default-badge" v-if="item.is_default">默认</text>
               </view>
-              <text class="phone">{{ item.mobile }}</text>
+              <text class="address-phone">{{ item.mobile }}</text>
               <text class="full-address">{{ item.formatted_address || formatAddress(item) }}</text>
             </view>
-            <view class="address-actions">
+            <view class="app-address-actions">
               <uni-icons type="compose" size="20" color="#666" @click="editAddress(item._id)"></uni-icons>
               <uni-icons type="trash" size="20" color="#666" @click="deleteAddress(item._id)"></uni-icons>
             </view>
@@ -132,33 +132,11 @@ export default {
 </script>
 
 <style scoped>
-.profile-card {
+.user-header {
   display: flex;
   align-items: center;
   padding: 16px;
   margin: 12px 12px 0;
-}
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-  margin-right: 12px;
-  background-color: #f0f0f0;
-}
-.profile-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.nickname {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-.phone {
-  font-size: 14px;
-  color: #999;
-  margin-top: 4px;
 }
 .address-section {
   padding: 16px;
@@ -179,53 +157,13 @@ export default {
 .address-list {
   margin-top: 8px;
 }
-.address-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-.address-item:last-child {
-  border-bottom: none;
-}
-.address-item.default {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 12px 8px;
-  margin: 0 -8px;
-}
-.address-info {
-  flex: 1;
-}
-.name-tag {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
 .name {
   font-size: 16px;
   font-weight: 500;
   color: #333;
   margin-right: 8px;
 }
-.tag {
-  font-size: 12px;
-  color: #666;
-  background-color: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-right: 8px;
-}
-.default-badge {
-  font-size: 12px;
-  color: #007aff;
-  background-color: #e6f2ff;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.phone {
+.address-phone {
   font-size: 14px;
   color: #666;
   display: block;
@@ -235,10 +173,5 @@ export default {
   font-size: 14px;
   color: #666;
   line-height: 1.4;
-}
-.address-actions {
-  display: flex;
-  gap: 12px;
-  margin-left: 10px;
 }
 </style>

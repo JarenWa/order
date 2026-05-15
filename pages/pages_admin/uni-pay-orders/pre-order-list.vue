@@ -397,8 +397,8 @@ export default {
  
 }
 .order-list-scroll {
-	 flex: 0.92;   
-	overflow-y: auto;                   
+	 flex: 1;
+	overflow-y: auto;
   /* height: ; */
   background-color: #f5f5f5;
 }

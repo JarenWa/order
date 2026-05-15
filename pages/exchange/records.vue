@@ -1,5 +1,5 @@
 <template>
-  <view class="record-container">
+  <view class="app-container">
     <unicloud-db
       ref="udb"
       v-slot:default="{ data, loading, error }"
@@ -8,13 +8,13 @@
       orderby="create_date desc"
       :manual="true"
     >
-      <view v-if="error" class="error">{{ error.message }}</view>
-      <view v-else-if="loading" class="loading">加载中...</view>
+      <view v-if="error" class="app-error">{{ error.message }}</view>
+      <view v-else-if="loading" class="app-loading">加载中...</view>
       <view v-else-if="data && data.length > 0" class="record-list">
-        <view v-for="item in data" :key="item._id" class="record-card">
-          <view class="header">
-            <text class="goods-name">{{ item.goods_name }}</text>
-            <text class="status" :class="'status-' + item.status">{{ getStatusText(item) }}</text>
+        <view v-for="item in data" :key="item._id" class="app-order-card">
+          <view class="app-order-header">
+            <text class="app-goods-name">{{ item.goods_name }}</text>
+            <text class="app-status-badge" :class="'app-status-badge-' + item.status">{{ getStatusText(item) }}</text>
           </view>
           <view class="info">
             <text>规格：{{ item.standard || '-' }} </text>
@@ -28,17 +28,17 @@
             <text>地址：{{ item.address }}</text>
             <text>创建时间：{{ formatDate(item.create_date) }}</text>
           </view>
-          <view class="actions">
+          <view class="app-order-actions">
             <!-- 待发货：显示取消按钮 -->
-            <button v-if="item.status === 0" class="cancel-btn" size="mini" @click="cancelOrder(item)">取消</button>
+            <button v-if="item.status === 0" class="app-action-btn app-action-btn-cancel" size="mini" @click="cancelOrder(item)">取消</button>
             <!-- 配送中：显示确认收货按钮 -->
-            <button v-if="item.status === 1" class="receive-btn" size="mini" @click="confirmReceive(item)">收货</button>
+            <button v-if="item.status === 1" class="app-action-btn app-action-btn-confirm" size="mini" @click="confirmReceive(item)">收货</button>
             <!-- 已取消：显示删除按钮 -->
-            <button v-if="item.status === 3" class="delete-btn" size="mini" @click="deleteOrder(item)">删除</button>
+            <button v-if="item.status === 3" class="app-action-btn app-action-btn-delete" size="mini" @click="deleteOrder(item)">删除</button>
           </view>
         </view>
       </view>
-      <view v-else class="empty">暂无兑换记录</view>
+      <view v-else class="app-empty">暂无兑换记录</view>
     </unicloud-db>
   </view>
 </template>
@@ -157,20 +157,6 @@ export default {
 </script>
 
 <style scoped>
-.record-container { padding: 10px; background-color: #f5f5f5; min-height: 100vh; }
-.record-card { background-color: #fff; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-.header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.goods-name { font-size: 16px; font-weight: bold; }
-.status { font-size: 12px; padding: 2px 8px; border-radius: 12px; }
-.status-0 { background-color: #ff9800; color: #fff; }
-.status-1 { background-color: #2196f3; color: #fff; }
-.status-2 { background-color: #4caf50; color: #fff; }
-.status-3 { background-color: #999; color: #fff; }
 .info, .address { font-size: 13px; color: #666; margin-bottom: 6px; }
 .address text { display: block; }
-.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
-.cancel-btn, .receive-btn, .delete-btn { margin: 0; padding: 4px 12px; font-size: 12px; }
-.cancel-btn { background-color: #ff9800; color: #fff; }
-.receive-btn { background-color: #4caf50; color: #fff; }
-.delete-btn { background-color: #f44336; color: #fff; }
 </style>

@@ -1,198 +1,170 @@
 {
-  "bsonType": "object",
-  "permission": {
-    "read": true,
-    "create": "auth.role == 'admin'",
-    "update": "auth.role == 'admin'",
-    "delete": "auth.role == 'admin'"
-  },
-  "properties": {
-    "_id": {
-      "description": "商品ID，系统自动生成",
-      "title": "商品编号"
-    },
-    
-    "sku": {
-      "bsonType": "string",
-      "description": "商家自编货号，唯一标识，用于入库扫码",
-      "title": "货号",
-      "trim": "both",
-      "maxLength": 30
-    },
-    
-    "name": {
-      "bsonType": "string",
-      "description": "商品名称",
-      "title": "名称",
-      "trim": "both",
-      "maxLength": 30
-    },
-    
-    "category": {
-      "bsonType": "string",
-      "description": "商品类别（一级）",
-      "title": "商品类别",
-      "trim": "both",
-      "maxLength": 20
-    },
-    
-    "standard": {
-      "bsonType": "string",
-      "description": "商品规格，如 500g/瓶、1箱*12瓶",
-      "title": "商品规格",
-      "trim": "both",
-      "maxLength": 30
-    },
-    
-    "goods_price": {
-      "bsonType": "int",
-      "description": "销售价，单位分",
-      "title": "售价"
-    },
-    
-    "original_price": {
-      "bsonType": "int",
-      "description": "原价，用于划线展示，单位分",
-      "title": "原价"
-    },
-    
-    "remain_count": {
-      "bsonType": "int",
-      "description": "可用库存数量（实时可下单）",
-      "title": "可用库存",
-      "defaultValue": 0,
-      "minimum": 0
-    },
-    
-    "locked_count": {
-      "bsonType": "int",
-      "description": "预占库存（未支付订单占用）",
-      "title": "预占库存",
-      "defaultValue": 0,
-      "minimum": 0
-    },
-    
-    "total_inbound": {
-      "bsonType": "int",
-      "description": "累计入库数量（审计用）",
-      "title": "累计入库",
-      "defaultValue": 0
-    },
-    
-    "total_sold": {
-      "bsonType": "int",
-      "description": "累计销量（冗余，避免实时计算）",
-      "title": "累计销量",
-      "defaultValue": 0
-    },
-    
-    "warning_count": {
-      "bsonType": "int",
-      "description": "库存预警阈值，低于此值标红提醒",
-      "title": "预警阈值",
-      "defaultValue": 10
-    },
-    
-    "goods_desc": {
-      "bsonType": "string",
-      "description": "商品简短描述，列表页展示",
-      "title": "商品简介",
-      "trim": "both",
-      "maxLength": 50
-    },
-    
-    "goods_remark": {
-      "bsonType": "string",
-      "description": "商品备注",
-      "title": "商品备注",
-      "trim": "both",
-      "maxLength": 50
-    },
-    
-    "shelf_life_months": {
-      "bsonType": "int",
-      "description": "保质期（月份），用于计算临期预警",
-      "title": "保质期(月)",
-      "minimum": 1,
-      "maximum": 120
-    },
-    "goods_thumb": {
-      "bsonType": "string",
-      "description": "商品缩略图，用于在列表或搜索结果中预览显示",
-      "title": "缩略图"
-    },
-    "goods_swiper_imgs": {
-      "bsonType": "array",
-      "description": "商品图地址数组",
-      "title": "轮播图",
-      "arrayType": "string"
-    },
-    
-    "is_hot": {
-      "bsonType": "bool",
-      "description": "是否热销，首页展示",
-      "title": "热销",
-      "defaultValue": false
-    },
-    
-    "is_new": {
-      "bsonType": "bool",
-      "description": "是否新品，首页展示",
-      "title": "新品",
-      "defaultValue": false
-    },
-    
-    "is_pre": {
-      "bsonType": "bool",
-      "description": "是否预售，预售商品允许负库存或定时到货",
-      "title": "预售",
-      "defaultValue": false
-    },
-    
-    "is_on_sale": {
-      "bsonType": "bool",
-      "description": "是否上架，false时下架不可见",
-      "title": "上架状态",
-      "defaultValue": true
-    },
-    
-    "sort_weight": {
-      "bsonType": "int",
-      "description": "排序权重，越大越靠前",
-      "title": "排序权重",
-      "defaultValue": 0
-    },
-    
-    "operater": {
-      "bsonType": "string",
-      "title": "最后操作员",
-      "description": "最后修改人ID",
-      "foreignKey": "uni-id-users._id"
-    },
-    
-    "created_at": {
-      "bsonType": "timestamp",
-      "forceDefaultValue": {
-        "$env": "now"
-      },
-      "description": "创建时间",
-      "title": "创建时间"
-    },
-    
-    "updated_at": {
-      "bsonType": "timestamp",
-      "defaultValue": {
-        "$env": "now"
-      },
-      "description": "更新时间",
-      "title": "更新时间"
-    }
-  },
-  "required": [
-    "sku",
-    "name",
-    "standard",
-    "goods_price",
-    "remain_count"
-  ]
+	"bsonType": "object",
+	"permission": {
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
+	},
+	"properties": {
+		"_id": {
+			"description": "商品ID，系统自动生成",
+			"title": "商品编号"
+		},
+		"sku": {
+			"bsonType": "string",
+			"description": "商家自编货号，唯一标识，用于入库扫码",
+			"title": "货号",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"name": {
+			"bsonType": "string",
+			"description": "商品名称",
+			"title": "名称",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"category": {
+			"bsonType": "string",
+			"description": "商品类别（一级）",
+			"title": "商品类别",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"standard": {
+			"bsonType": "string",
+			"description": "商品规格，如 500g\/瓶、1箱*12瓶",
+			"title": "商品规格",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"goods_price": {
+			"bsonType": "int",
+			"description": "销售价，单位分",
+			"title": "售价"
+		},
+		"original_price": {
+			"bsonType": "int",
+			"description": "原价，用于划线展示，单位分",
+			"title": "原价"
+		},
+		"remain_count": {
+			"bsonType": "int",
+			"description": "可用库存数量（实时可下单）",
+			"title": "可用库存",
+			"defaultValue": 0,
+			"minimum": 0
+		},
+		"locked_count": {
+			"bsonType": "int",
+			"description": "预占库存（未支付订单占用）",
+			"title": "预占库存",
+			"defaultValue": 0,
+			"minimum": 0
+		},
+		"total_inbound": {
+			"bsonType": "int",
+			"description": "累计入库数量（审计用）",
+			"title": "累计入库",
+			"defaultValue": 0
+		},
+		"total_sold": {
+			"bsonType": "int",
+			"description": "累计销量（冗余，避免实时计算）",
+			"title": "累计销量",
+			"defaultValue": 0
+		},
+		"warning_count": {
+			"bsonType": "int",
+			"description": "库存预警阈值，低于此值标红提醒",
+			"title": "预警阈值",
+			"defaultValue": 10
+		},
+		"goods_desc": {
+			"bsonType": "string",
+			"description": "商品简短描述，列表页展示",
+			"title": "商品简介",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"goods_remark": {
+			"bsonType": "string",
+			"description": "商品备注",
+			"title": "商品备注",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"shelf_life_months": {
+			"bsonType": "int",
+			"description": "保质期（月份），用于计算临期预警",
+			"title": "保质期(月)",
+			"minimum": 1,
+			"maximum": 120
+		},
+		"goods_thumb": {
+			"bsonType": "string",
+			"description": "商品缩略图，用于在列表或搜索结果中预览显示",
+			"title": "缩略图"
+		},
+		"goods_swiper_imgs": {
+			"bsonType": "array",
+			"description": "商品图地址数组",
+			"title": "轮播图",
+			"arrayType": "string"
+		},
+		"is_hot": {
+			"bsonType": "bool",
+			"description": "是否热销，首页展示",
+			"title": "热销",
+			"defaultValue": false
+		},
+		"is_new": {
+			"bsonType": "bool",
+			"description": "是否新品，首页展示",
+			"title": "新品",
+			"defaultValue": false
+		},
+		"is_pre": {
+			"bsonType": "bool",
+			"description": "是否预售，预售商品允许负库存或定时到货",
+			"title": "预售",
+			"defaultValue": false
+		},
+		"is_on_sale": {
+			"bsonType": "bool",
+			"description": "是否上架，false时下架不可见",
+			"title": "上架状态",
+			"defaultValue": true
+		},
+		"sort_weight": {
+			"bsonType": "int",
+			"description": "排序权重，越大越靠前",
+			"title": "排序权重",
+			"defaultValue": 0
+		},
+		"operater": {
+			"bsonType": "string",
+			"title": "最后操作员",
+			"description": "最后修改人ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"created_at": {
+			"bsonType": "timestamp",
+			"forceDefaultValue": {
+				"$env": "now"
+			},
+			"description": "创建时间",
+			"title": "创建时间"
+		},
+		"updated_at": {
+			"bsonType": "timestamp",
+			"defaultValue": {
+				"$env": "now"
+			},
+			"description": "更新时间",
+			"title": "更新时间"
+		}
+	},
+	"required": ["sku", "name", "standard", "goods_price", "remain_count"]
 }

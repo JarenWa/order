@@ -371,3 +371,863 @@ $app-image-placeholder: #f0f0f0;
 .app-mt-10 { margin-top: 10px; }
 .app-pb-60 { padding-bottom: 60px; }
 .app-pb-70 { padding-bottom: 70px; }
+
+/* =====================================================
+   新增通用样式 - 页面级样式提取与复用
+   ===================================================== */
+
+/* ---------- 管理端工具栏 ---------- */
+.app-admin-toolbar {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+  background-color: $app-card-bg;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.app-admin-filter-row {
+  display: flex;
+  align-items: center;
+  margin: 0 10px 10px;
+  background-color: $app-card-bg;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  gap: 10px;
+}
+
+.app-admin-search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.app-admin-search-input {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 20px 0 0 20px;
+  padding: 0 12px;
+  font-size: 14px;
+  background-color: #f5f5f5;
+}
+
+.app-admin-search-btn {
+  flex-shrink: 0;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 0 20px 20px 0;
+  margin-left: -1px;
+  font-size: 14px;
+  background-color: $app-primary;
+  color: #fff;
+  border: none;
+}
+
+.app-admin-picker {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+}
+
+.app-admin-picker-arrow {
+  margin-left: 4px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* ---------- 订单卡片 ---------- */
+.app-order-card {
+  background-color: $app-card-bg;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.app-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.app-order-no {
+  font-size: 12px;
+  color: $app-text-light;
+}
+
+.app-order-pre {
+  font-size: 12px;
+  font-weight: bold;
+  color: #55aaff;
+}
+
+.app-order-address {
+  font-size: 13px;
+  color: $app-text-grey;
+  margin-bottom: 8px;
+}
+
+.app-order-address text {
+  display: block;
+}
+
+.app-order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.app-order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid $app-border;
+}
+
+/* ---------- 操作按钮 ---------- */
+.app-action-btn {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin: 0;
+  color: #fff;
+  border: none;
+  line-height: 1.6;
+}
+
+.app-action-btn-cancel { background-color: $app-warning; }
+.app-action-btn-edit { background-color: $app-info; }
+.app-action-btn-confirm { background-color: $app-success; }
+.app-action-btn-delete { background-color: $app-danger; }
+.app-action-btn-ship { background-color: $app-success; }
+.app-action-btn-print { background-color: #607d8b; }
+.app-action-btn-complete { background-color: #9c27b0; }
+.app-action-btn-pdf { background-color: #ff5722; }
+
+/* ---------- 弹窗表单 ---------- */
+.app-popup-form {
+  width: 300px;
+  background: $app-card-bg;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.app-popup-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid $app-border;
+}
+
+.app-popup-form-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: $app-text;
+}
+
+.app-popup-form-close {
+  font-size: 20px;
+  color: $app-text-light;
+  padding: 0 4px;
+}
+
+.app-popup-form-body {
+  padding: 12px 16px;
+}
+
+.app-popup-form-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.app-popup-form-label {
+  width: 90px;
+  font-size: 13px;
+  color: $app-text-grey;
+  flex-shrink: 0;
+}
+
+.app-popup-form-label-required::before {
+  content: '* ';
+  color: $app-danger;
+}
+
+.app-popup-form-input {
+  flex: 1;
+  height: 34px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.app-popup-form-picker {
+  flex: 1;
+  height: 34px;
+  line-height: 34px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: $app-text;
+}
+
+.app-popup-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid $app-border;
+}
+
+.app-popup-form-btn {
+  margin: 0;
+  padding: 4px 14px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.app-popup-form-btn-cancel {
+  background-color: #f5f5f5;
+  color: $app-text-grey;
+  border: none;
+}
+
+.app-popup-form-btn-confirm {
+  background-color: $app-success;
+  color: #fff;
+  border: none;
+}
+
+/* ---------- 仪表盘 ---------- */
+.app-dashboard-header {
+  padding: 16px 16px 24px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.app-dashboard-header-title {
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+}
+
+.app-dashboard-header-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 4px;
+  display: block;
+}
+
+.app-dashboard-header-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.app-stat-row {
+  display: flex;
+  gap: 10px;
+  padding: 0 12px;
+  margin-top: -14px;
+  flex-shrink: 0;
+}
+
+.app-stat-card {
+  flex: 1;
+  background: $app-card-bg;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.app-stat-card-pending { border-top: 3px solid $app-warning; }
+.app-stat-card-shipping { border-top: 3px solid $app-success; }
+.app-stat-card-processing { border-top: 3px solid $app-danger; }
+
+.app-stat-num {
+  font-size: 22px;
+  font-weight: bold;
+  color: $app-text;
+  display: block;
+}
+
+.app-stat-label {
+  font-size: 12px;
+  color: $app-text-grey;
+  margin-top: 2px;
+  display: block;
+}
+
+.app-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.app-section-header-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: $app-text;
+}
+
+.app-section-more {
+  font-size: 12px;
+  color: #667eea;
+}
+
+.app-warn-card {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.app-warn-card:last-child {
+  border-bottom: none;
+}
+
+.app-warn-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background-color: $app-image-placeholder;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.app-warn-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-warn-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: $app-text;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-warn-btn {
+  margin: 0;
+  margin-left: 6px;
+  padding: 2px 10px;
+  font-size: 11px;
+  line-height: 20px;
+  height: 26px;
+  background-color: $app-success;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+.app-menu-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-menu-item {
+  width: calc(30% - 5.33px);
+  background: $app-card-bg;
+  border-radius: 8px;
+  padding: 10px 4px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: transform 0.2s;
+}
+
+.app-menu-item:active {
+  transform: scale(0.96);
+}
+
+.app-menu-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.app-menu-label {
+  font-size: 12px;
+  color: $app-text;
+}
+
+/* ---------- 商品网格（首页） ---------- */
+.app-goods-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.app-goods-grid-item {
+  width: 30%;
+  background-color: $app-card-bg;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.app-goods-grid-image {
+  width: 100%;
+  height: 90px;
+  background-color: $app-image-placeholder;
+}
+
+.app-goods-grid-info {
+  padding: 8px;
+}
+
+.app-section-title-bar {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-left: 5px;
+  display: block;
+}
+
+/* ---------- 用户中心 ---------- */
+.app-user-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.app-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  margin-right: 15px;
+  background-color: $app-image-placeholder;
+}
+
+.app-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-nickname {
+  font-size: 18px;
+  font-weight: bold;
+  color: $app-text;
+}
+
+.app-phone {
+  font-size: 14px;
+  color: $app-text-light;
+  margin-top: 4px;
+}
+
+.app-score-section {
+  display: flex;
+  padding: 15px 20px;
+  justify-content: space-around;
+}
+
+.app-score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app-score-label {
+  font-size: 14px;
+  color: $app-text-grey;
+}
+
+.app-score-value {
+  font-size: 20px;
+  margin-top: 5px;
+}
+
+.app-order-status-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.app-order-status-card:active {
+  background-color: #e0e0e0;
+}
+
+.app-status-count {
+  font-size: 20px;
+}
+
+/* ---------- 地址项 ---------- */
+.app-address-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.app-address-item:last-child {
+  border-bottom: none;
+}
+
+.app-address-item-default {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 12px 8px;
+  margin: 0 -8px;
+}
+
+.app-address-name-tag {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.app-address-tag {
+  font-size: 12px;
+  color: $app-text-grey;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.app-address-default-badge {
+  font-size: 12px;
+  color: $app-primary;
+  background-color: #e6f2ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.app-address-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: 10px;
+}
+
+/* ---------- 状态徽章 ---------- */
+.app-status-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #fff;
+  display: inline-block;
+}
+
+.app-status-badge-0 { background-color: $app-warning; }
+.app-status-badge-1 { background-color: $app-info; }
+.app-status-badge-2 { background-color: $app-success; }
+.app-status-badge-3 { background-color: $app-text-light; }
+.app-status-badge-4 { background-color: #ff5722; }
+
+/* ---------- 补充状态文字色 ---------- */
+.app-status-4 { color: #ff5722; }
+.app-status--1 { color: $app-text-light; }
+.app-status--2 { color: $app-text-light; }
+
+/* ---------- 标签补充 ---------- */
+.app-tag-pre { background-color: #9c27b0; }
+
+/* ---------- 通用工具 ---------- */
+.app-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shadow-sm {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.app-shadow-md {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* =====================================================
+   企业级 UI 美化增强
+   ===================================================== */
+
+/* ---------- 区块标题（带左侧色条） ---------- */
+.app-section-header-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-left: 10px;
+}
+
+.app-section-header-bar::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(180deg, $app-primary 0%, #00c6ff 100%);
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.app-section-header-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: $app-text;
+}
+
+.app-section-header-sub {
+  font-size: 12px;
+  color: $app-text-light;
+  margin-left: 8px;
+}
+
+/* ---------- 商品卡片（企业级） ---------- */
+.app-product-card {
+  background-color: $app-card-bg;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.app-product-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.app-product-image {
+  width: 100%;
+  height: 100px;
+  background-color: $app-image-placeholder;
+}
+
+.app-product-info {
+  padding: 10px;
+}
+
+.app-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: $app-text;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.app-product-meta {
+  font-size: 12px;
+  color: $app-text-light;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.app-product-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.app-product-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: $app-price;
+}
+
+.app-product-original-price {
+  font-size: 12px;
+  color: $app-text-light;
+  text-decoration: line-through;
+}
+
+/* ---------- 圆形加购按钮（增强） ---------- */
+.app-cart-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, $app-primary 0%, #00c6ff 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.35);
+}
+
+/* ---------- 用户页横幅 ---------- */
+.app-user-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.app-user-banner-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-right: 16px;
+}
+
+.app-user-banner-info {
+  flex: 1;
+}
+
+.app-user-banner-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.app-user-banner-phone {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6px;
+}
+
+/* ---------- 积分展示（增强） ---------- */
+.app-score-board {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px 0;
+  background-color: $app-card-bg;
+}
+
+.app-score-board-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.app-score-board-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 24px;
+  background-color: $app-border;
+}
+
+.app-score-board-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: $app-price;
+}
+
+.app-score-board-label {
+  font-size: 12px;
+  color: $app-text-grey;
+  margin-top: 4px;
+}
+
+/* ---------- 状态网格（用户页订单状态） ---------- */
+.app-status-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 12px 4px;
+  background-color: $app-card-bg;
+}
+
+.app-status-grid-item {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  position: relative;
+}
+
+.app-status-grid-item:active {
+  opacity: 0.7;
+}
+
+.app-status-grid-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 20px);
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 4px;
+  background-color: $app-danger;
+  color: #fff;
+  font-size: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.app-status-grid-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.app-status-grid-label {
+  font-size: 13px;
+  color: $app-text;
+}
+
+/* ---------- 列表菜单项（增强） ---------- */
+.app-menu-list-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: $app-card-bg;
+  border-bottom: 1px solid $app-border;
+}
+
+.app-menu-list-item:last-child {
+  border-bottom: none;
+}
+
+.app-menu-list-item:active {
+  background-color: #f9f9f9;
+}
+
+.app-menu-list-text {
+  flex: 1;
+  font-size: 15px;
+  color: $app-text;
+}

@@ -2,24 +2,26 @@
   <view class="app-container">
     <!-- 预售商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">[非现货,按期安排配送]</view>
-      <view class="goods-list">
+      <view class="app-section-header-bar">
+        <text class="app-section-header-text">预售专区</text>
+        <text class="app-section-header-sub">非现货，按期配送</text>
+      </view>
+      <view class="app-goods-grid">
         <block v-for="item in preGoods" :key="item._id">
-          <view class="goods-item" @click="goGoodsDetail(item._id)">
-            <image class="goods-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
-            <view class="goods-info">
-              <text class="goods-name app-goods-name-clamp">{{ item.name }}</text>
-              <text class="goods-standard app-goods-standard">{{ item.standard }}</text>
-              <text class="goods_desc">{{ item.goods_desc }}</text>
-              <text class="goods_remark app-text-grey">{{ item.goods_remark }}</text>
-              <view class="price-row">
-                <text class="goods-price app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
-                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-original-price">¥{{ formatPrice(item.original_price) }}</text>
+          <view class="app-goods-grid-item app-product-card" @click="goGoodsDetail(item._id)">
+            <image class="app-product-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
+            <view class="app-product-info">
+              <text class="app-product-name">{{ item.name }}</text>
+              <text class="app-product-meta">{{ item.standard }}</text>
+              <text v-if="item.goods_desc" class="app-product-meta" style="color: #55aaff;">{{ item.goods_desc }}</text>
+              <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <view class="app-product-price-row">
+                <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
+                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
               </view>
             </view>
-            <!-- 预售商品加号按钮：直接下单 -->
-            <view class="app-add-btn" @click.stop="showPreOrder(item)">
-              <uni-icons type="plusempty" size="20" color="#ffffff"></uni-icons>
+            <view class="app-cart-btn" @click.stop="showPreOrder(item)">
+              <uni-icons type="plusempty" size="18" color="#ffffff"></uni-icons>
             </view>
           </view>
         </block>
@@ -29,23 +31,25 @@
 
     <!-- 新品商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">✨ 现货新品</view>
-      <view class="goods-list">
+      <view class="app-section-header-bar">
+        <text class="app-section-header-text">现货新品</text>
+        <text class="app-section-header-sub">新鲜上架</text>
+      </view>
+      <view class="app-goods-grid">
         <block v-for="item in newGoods" :key="item._id">
-          <view class="goods-item" @click="goGoodsDetail(item._id)">
-            <image class="goods-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
-            <view class="goods-info">
-              <text class="goods-name app-goods-name-clamp">{{ item.name }}</text>
-              <text class="goods-standard app-goods-standard">{{ item.standard }}</text>
-              <text class="goods_remark app-text-grey">{{ item.goods_remark }}</text>
-              <view class="price-row">
-                <text class="goods-price app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
-                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-original-price">¥{{ formatPrice(item.original_price) }}</text>
+          <view class="app-goods-grid-item app-product-card" @click="goGoodsDetail(item._id)">
+            <image class="app-product-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
+            <view class="app-product-info">
+              <text class="app-product-name">{{ item.name }}</text>
+              <text class="app-product-meta">{{ item.standard }}</text>
+              <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <view class="app-product-price-row">
+                <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
+                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
               </view>
             </view>
-            <!-- 普通商品加号按钮：加入购物车 -->
-            <view class="app-add-btn" @click.stop="showAddToCart(item)">
-              <uni-icons type="plusempty" size="20" color="#ffffff"></uni-icons>
+            <view class="app-cart-btn" @click.stop="showAddToCart(item)">
+              <uni-icons type="plusempty" size="18" color="#ffffff"></uni-icons>
             </view>
           </view>
         </block>
@@ -55,23 +59,25 @@
 
     <!-- 热销商品区域 -->
     <view class="goods-section app-card-flat">
-      <view class="section-title">🔥 现货热销</view>
-      <view class="goods-list">
+      <view class="app-section-header-bar">
+        <text class="app-section-header-text">现货热销</text>
+        <text class="app-section-header-sub">人气精选</text>
+      </view>
+      <view class="app-goods-grid">
         <block v-for="item in hotGoods" :key="item._id">
-          <view class="goods-item" @click="goGoodsDetail(item._id)">
-            <image class="goods-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
-            <view class="goods-info">
-              <text class="goods-name app-goods-name-clamp">{{ item.name }}</text>
-              <text class="goods-standard app-goods-standard">{{ item.standard }}</text>
-              <text class="goods_remark app-text-grey">{{ item.goods_remark }}</text>
-              <view class="price-row">
-                <text class="goods-price app-text-price">¥{{ formatPrice(item.goods_price) }}</text>
-                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-original-price">¥{{ formatPrice(item.original_price) }}</text>
+          <view class="app-goods-grid-item app-product-card" @click="goGoodsDetail(item._id)">
+            <image class="app-product-image" :src="getGoodsImage(item)" mode="aspectFill" @error="onImageError(item)"></image>
+            <view class="app-product-info">
+              <text class="app-product-name">{{ item.name }}</text>
+              <text class="app-product-meta">{{ item.standard }}</text>
+              <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <view class="app-product-price-row">
+                <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
+                <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
               </view>
             </view>
-            <!-- 普通商品加号按钮：加入购物车 -->
-            <view class="app-add-btn" @click.stop="showAddToCart(item)">
-              <uni-icons type="plusempty" size="20" color="#ffffff"></uni-icons>
+            <view class="app-cart-btn" @click.stop="showAddToCart(item)">
+              <uni-icons type="plusempty" size="18" color="#ffffff"></uni-icons>
             </view>
           </view>
         </block>
@@ -323,14 +329,8 @@ export default {
 
 <style scoped>
 .goods-section { padding: 10px; }
-.section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; padding-left: 5px; }
-.goods-list { display: flex; flex-wrap: wrap; justify-content: space-between; }
-.goods-item { width: 30%; background-color: #fff; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
-.goods-image { width: 100%; height: 90px; background-color: #f0f0f0; }
-.goods-info { padding: 8px; }
-.goods_desc { font-size: 12px; color: #55aaff; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.goods_remark { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
-.price-row { display: flex; align-items: center; margin-top: 4px; }
-.goods-price { font-size: 14px; }
+.app-goods-grid { justify-content: flex-start; gap: 10px; }
+.app-goods-grid-item { width: calc(50% - 5px); }
+.app-product-image { height: 140px; }
 .stock-info { text-align: center; color: #666; font-size: 14px; margin-bottom: 10px; }
 </style>

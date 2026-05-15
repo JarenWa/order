@@ -250,8 +250,8 @@ export default {
   height: 100vh;  
 }
 .list-scroll {
-	flex: 0.92;
-	overflow-y: auto;          
+	flex: 1;
+	overflow-y: auto;
   /* height: 100%; */
   background-color: #f8f8f8;
 }
