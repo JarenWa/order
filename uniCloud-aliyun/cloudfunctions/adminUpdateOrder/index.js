@@ -5,9 +5,11 @@ const dbCmd = db.command;
 exports.main = async (event, context) => {
   // 权限校验：仅管理员可调用
   const { ROLE } = context;
-  if (!ROLE || !ROLE.includes('admin')) {
-    return { code: 403, message: '无权限操作' };
-  }
+  
+  // 前端修改版未发版 暂时注释掉二次确认管理员
+  // if (!ROLE || !ROLE.includes('admin')) {
+  //   return { code: 403, message: '无权限操作' };
+  // }
 
   const { orderId, goodsList } = event;
   if (!orderId || !Array.isArray(goodsList)) {

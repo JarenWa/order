@@ -315,19 +315,51 @@ export default {
         }
       });
     },
-    confirmCancel(order) {
-      uni.showModal({
-        title: '提示',
-        content: '确定要取消该订单吗？',
-        cancelText: '不取消',
-        confirmText: '取消订单',
-        success: (res) => {
-          if (res.confirm) {
-            this.cancelOrder(order);
-          }
-        }
-      });
-    },
+    // confirmCancel(order) {
+    //   uni.showModal({
+    //     title: '提示',
+    //     content: '确定要取消该订单吗？',
+    //     cancelText: '不取消',
+    //     confirmText: '取消订单',
+    //     success: (res) => {
+    //       if (res.confirm) {
+    //         this.cancelOrder(order);
+    //       }
+    //     }
+    //   });
+    // },
+	
+	confirmCancel(order) {
+	  // 根据订单状态设置不同的弹窗内容
+	  let title, content, confirmText;
+	  
+	  switch (order.status) {
+	    case 0:
+	      title = '确定要取消该订单吗？';
+	      content = '请及时电话通知客户';
+	      break;
+	    case 4:
+	      title = '该订单【已出单】，确定取消吗？';
+	      content = '请及时电话通知客户';
+	      break;
+		case 1:
+		  title = '该订单【已发货】，确定取消吗？';
+		  content = '请及时电话通知客户';
+		  break;
+	  }
+	
+	  uni.showModal({
+	    title: title,
+	    content: content,
+	    cancelText: '不取消',
+	    confirmText: '取消订单',
+	    success: (res) => {
+	      if (res.confirm) {
+	        this.cancelOrder(order);
+	      }
+	    }
+	  });
+	},
 	
 	confirmShip(order){
 		uni.showModal({

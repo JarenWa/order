@@ -15,9 +15,20 @@ exports.main = async (event, context) => {
     if (!order) {
       return { code: 404, message: '订单不存在' };
     }
-    if (order.status !== 0) {
+	
+	// 管理员和普通用户能取消的订单状态不同，前端会控制，这里双重校验
+    if (cancelType === 'user' && order.status !== 0) {
       return { code: 400, message: '当前订单状态不可取消' };
     }
+	
+	if (cancelType === 'admin' && order.status === 2) {
+	  return { code: 400, message: '当前订单状态【已收货】不可取消' };
+	}
+	if (cancelType === 'admin' && order.status === 3) {
+	  return { code: 400, message: '当前订单状态【已取消】不可取消' };
+	}
+	
+	
 
     // 2. 查询商品库存（事务外）
     const goodsMap = {};

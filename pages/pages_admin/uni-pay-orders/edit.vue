@@ -248,7 +248,9 @@ export default {
       try {
         const res = await uniCloud.callFunction({
           name: 'adminUpdateOrder',
+		  
           data: {
+			dcancelType: 'admin',
             orderId: this.orderId,
             goodsList: this.goodsList.map(item => ({
               good_id: item.good_id,
