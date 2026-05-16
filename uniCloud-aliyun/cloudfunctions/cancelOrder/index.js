@@ -48,45 +48,47 @@ exports.main = async (event, context) => {
       flowMap[f.product_id] = f.batch_info || [];
     });
 
-    // 事务外：计算每个商品需要恢复的批次计划
+    // 事务外：计算每个商品需要恢复的批次计划（仅普通订单）
     const restorePlans = {};
     const productIds = order.goods_list.map(item => item.good_id);
 
-    for (const pid of productIds) {
-      const batchInfo = flowMap[pid] || [];
-      const updateMap = {};
-      let restored = 0;
+    if (!order.is_pre_order) {
+      for (const pid of productIds) {
+        const batchInfo = flowMap[pid] || [];
+        const updateMap = {};
+        let restored = 0;
 
-      if (batchInfo.length > 0) {
-        for (const info of batchInfo) {
-          if (!info.batch_id || !info.deduct) continue;
-          updateMap[info.batch_id] = (updateMap[info.batch_id] || 0) + info.deduct;
-          restored += info.deduct;
+        if (batchInfo.length > 0) {
+          for (const info of batchInfo) {
+            if (!info.batch_id || !info.deduct) continue;
+            updateMap[info.batch_id] = (updateMap[info.batch_id] || 0) + info.deduct;
+            restored += info.deduct;
+          }
         }
-      }
 
-      const goodItem = order.goods_list.find(i => i.good_id === pid);
-      const totalRestore = goodItem ? goodItem.count : 0;
-      const remain = totalRestore - restored;
+        const goodItem = order.goods_list.find(i => i.good_id === pid);
+        const totalRestore = goodItem ? goodItem.count : 0;
+        const remain = totalRestore - restored;
 
-      // 剩余部分按从新到旧顺序回填（优先填充最新批次）
-      let left = remain;
-      if (left > 0) {
-        const batchRes = await db.collection('goods_stock_batch')
-          .where({ product_id: pid })
-          .orderBy('production_date', 'desc')
-          .get();
-        for (const batch of (batchRes.data || [])) {
-          if (left <= 0) break;
-          const space = (batch.initial_qty || 0) - batch.remain_qty;
-          if (space <= 0) continue;
-          const add = Math.min(left, space);
-          left -= add;
-          updateMap[batch._id] = (updateMap[batch._id] || 0) + add;
+        // 剩余部分按从新到旧顺序回填（优先填充最新批次）
+        let left = remain;
+        if (left > 0) {
+          const batchRes = await db.collection('goods_stock_batch')
+            .where({ product_id: pid })
+            .orderBy('production_date', 'desc')
+            .get();
+          for (const batch of (batchRes.data || [])) {
+            if (left <= 0) break;
+            const space = (batch.initial_qty || 0) - batch.remain_qty;
+            if (space <= 0) continue;
+            const add = Math.min(left, space);
+            left -= add;
+            updateMap[batch._id] = (updateMap[batch._id] || 0) + add;
+          }
         }
-      }
 
-      restorePlans[pid] = { updateMap, needCreate: left > 0, remain: left };
+        restorePlans[pid] = { updateMap, needCreate: left > 0, remain: left };
+      }
     }
 
     // 3. 使用事务执行写操作（事务内无查询）
@@ -107,31 +109,33 @@ exports.main = async (event, context) => {
             updated_at: Date.now()
           });
 
-          // 3.2 恢复批次库存
-          for (const [batchId, addQty] of Object.entries(plan.updateMap)) {
-            await transaction.collection('goods_stock_batch').doc(batchId).update({
-              remain_qty: dbCmd.inc(addQty),
-              updated_at: Date.now()
-            });
-          }
+          if (!order.is_pre_order && plan) {
+            // 3.2 恢复批次库存
+            for (const [batchId, addQty] of Object.entries(plan.updateMap)) {
+              await transaction.collection('goods_stock_batch').doc(batchId).update({
+                remain_qty: dbCmd.inc(addQty),
+                updated_at: Date.now()
+              });
+            }
 
-          if (plan.needCreate && plan.remain > 0) {
-            await transaction.collection('goods_stock_batch').add({
-              product_id: item.good_id,
-              production_date: '',
-              batch_no: 'B' + Date.now().toString(36).toUpperCase(),
-              remain_qty: plan.remain,
-              initial_qty: plan.remain,
-              unit_cost: 0,
-              created_at: Date.now()
-            });
+            if (plan.needCreate && plan.remain > 0) {
+              await transaction.collection('goods_stock_batch').add({
+                product_id: item.good_id,
+                production_date: '',
+                batch_no: 'B' + Date.now().toString(36).toUpperCase(),
+                remain_qty: plan.remain,
+                initial_qty: plan.remain,
+                unit_cost: 0,
+                created_at: Date.now()
+              });
+            }
           }
 
           // 3.3 写入流水
           await transaction.collection('stock_flow').add({
             sku: good.sku || '',
             product_id: item.good_id,
-            type: 'adjust',
+            type: order.is_pre_order ? 'pre_order_cancel' : 'adjust',
             quantity: item.count,
             before_count: beforeCount,
             after_count: afterCount,
@@ -153,22 +157,24 @@ exports.main = async (event, context) => {
       await transaction.collection('uni-pay-orders').doc(orderId).update(updateData);
       await transaction.commit();
 
-      // 事务提交后：异步更新 current_production_date（事务外查询）
-      for (const pid of productIds) {
-        try {
-          const batchRes = await db.collection('goods_stock_batch')
-            .where({ product_id: pid, remain_qty: dbCmd.gt(0) })
-            .orderBy('production_date', 'asc')
-            .limit(1)
-            .get();
-          const currentDate = (batchRes.data && batchRes.data.length > 0)
-            ? batchRes.data[0].production_date
-            : '';
-          await db.collection('goods').doc(pid).update({
-            current_production_date: currentDate
-          });
-        } catch (e) {
-          console.warn('更新生产日期失败', pid, e);
+      // 事务提交后：异步更新 current_production_date（事务外查询，仅普通订单）
+      if (!order.is_pre_order) {
+        for (const pid of productIds) {
+          try {
+            const batchRes = await db.collection('goods_stock_batch')
+              .where({ product_id: pid, remain_qty: dbCmd.gt(0) })
+              .orderBy('production_date', 'asc')
+              .limit(1)
+              .get();
+            const currentDate = (batchRes.data && batchRes.data.length > 0)
+              ? batchRes.data[0].production_date
+              : '';
+            await db.collection('goods').doc(pid).update({
+              current_production_date: currentDate
+            });
+          } catch (e) {
+            console.warn('更新生产日期失败', pid, e);
+          }
         }
       }
 

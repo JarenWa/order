@@ -14,8 +14,8 @@
               <text class="app-product-name">{{ item.name }}</text>
               <text class="app-product-meta">{{ item.standard }}</text>
               <text v-if="item.goods_desc" class="app-product-meta" style="color: #55aaff;">{{ item.goods_desc }}</text>
-              <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
-              <text v-if="item.current_production_date" class="app-product-meta">生产日期: {{ item.current_production_date }}</text>
+              <text v-if="item.goods_remark" class="app-product-meta" style="color: #55aaff;">{{ item.goods_remark }}</text>
+              <!-- <text v-if="item.current_production_date" class="app-product-meta">生产日期: {{ item.current_production_date }}</text> -->
               <view class="app-product-price-row">
                 <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
                 <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
