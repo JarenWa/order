@@ -17,6 +17,7 @@
           <uni-list-item title="商品简介" :right-text="data.goods_desc || '无'" />
           <uni-list-item title="商品规格" :right-text="data.standard || '无'" />
           <uni-list-item title="商品类别" :right-text="getCategoryName(data.category)" />
+          <uni-list-item v-if="data.current_production_date" title="生产日期" :right-text="data.current_production_date" />
           <uni-list-item v-if="data.goods_remark" title="商品备注" :right-text="data.goods_remark" />
         </uni-list>
       </uni-card>

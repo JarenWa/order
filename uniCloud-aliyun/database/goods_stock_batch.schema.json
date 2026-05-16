@@ -1,0 +1,78 @@
+{
+  "bsonType": "object",
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "批次ID，系统自动生成"
+    },
+    "product_id": {
+      "bsonType": "string",
+      "description": "关联商品ID",
+      "title": "商品ID",
+      "trim": "both"
+    },
+    "production_date": {
+      "bsonType": "string",
+      "description": "生产日期，格式 YYYY-MM",
+      "title": "生产日期",
+      "trim": "both",
+      "pattern": "^\\d{4}-\\d{2}$"
+    },
+    "batch_no": {
+      "bsonType": "string",
+      "description": "入库批次号",
+      "title": "批次号",
+      "trim": "both"
+    },
+    "remain_qty": {
+      "bsonType": "int",
+      "description": "该批次剩余库存数量",
+      "title": "剩余数量",
+      "defaultValue": 0,
+      "minimum": 0
+    },
+    "initial_qty": {
+      "bsonType": "int",
+      "description": "该批次累计入库总数（用于取消/改单回滚时判断可回填空间）",
+      "title": "入库总数",
+      "defaultValue": 0,
+      "minimum": 0
+    },
+    "unit_cost": {
+      "bsonType": "int",
+      "description": "成本单价（单位：分），入库时可选填写",
+      "title": "成本单价(分)",
+      "minimum": 0
+    },
+    "created_at": {
+      "bsonType": "timestamp",
+      "forceDefaultValue": {
+        "$env": "now"
+      },
+      "description": "创建时间",
+      "title": "创建时间"
+    }
+  },
+  "required": ["product_id", "production_date", "remain_qty"],
+  "index": [
+    {
+      "name": "idx_product_date",
+      "key": {
+        "product_id": 1,
+        "production_date": 1
+      }
+    },
+    {
+      "name": "idx_product_qty",
+      "key": {
+        "product_id": 1,
+        "remain_qty": -1
+      }
+    }
+  ]
+}

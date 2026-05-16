@@ -7,9 +7,9 @@
       <uni-forms-item name="name" label="名称" required>
         <uni-easyinput placeholder="商品名称" v-model="formData.name" trim="both" />
       </uni-forms-item>
-      <uni-forms-item name="remain_count" label="库存数量" required>
+     <!-- <uni-forms-item name="remain_count" label="库存数量" required>
         <uni-easyinput placeholder="库存数量" type="number" v-model="formData.remain_count" />
-      </uni-forms-item>
+      </uni-forms-item> -->
       <uni-forms-item name="priceYuan" label="售价(元)" required>
         <uni-easyinput
           placeholder="请输入价格，如29.90"
@@ -24,8 +24,11 @@
       <uni-forms-item name="standard" label="商品规格" required>
         <uni-easyinput placeholder="商品规格" v-model="formData.standard" trim="both" />
       </uni-forms-item>
-      <uni-forms-item label="商品类别" name="category">
+      <uni-forms-item label="商品类别" name="category" required>
         <uni-data-select v-model="formData.category" :localdata="categoryOptions" placeholder="请选择商品类别" />
+      </uni-forms-item>
+      <uni-forms-item name="operater" label="操作员">
+        <uni-easyinput placeholder="操作员" v-model="formData.operater" disabled />
       </uni-forms-item>
       <uni-forms-item name="shelf_life_months" label="保质期(月)">
         <uni-easyinput
@@ -85,9 +88,6 @@
       <uni-forms-item name="is_pre" label="是否预售">
         <switch @change="binddata('is_pre', $event.detail.value)" :checked="formData.is_pre" />
       </uni-forms-item>
-      <uni-forms-item name="operater" label="操作员">
-        <uni-easyinput placeholder="操作员" v-model="formData.operater" />
-      </uni-forms-item>
 
       <view class="uni-button-group">
         <button type="primary" class="uni-button" @click="submit">提交</button>
@@ -117,7 +117,6 @@ export default {
     const formData = {
       sku: '',
       name: '',
-      remain_count: 999,
       goods_price: null,
       priceYuan: '',
       original_price: null,
@@ -144,6 +143,11 @@ export default {
       categoryOptions: [],
       rules: {
         ...getValidator(Object.keys(formData)),
+		category: {
+		  rules: [
+		    { required: true, errorMessage: '请选择类别' },
+		  ]
+		},
         priceYuan: {
           rules: [
             { required: true, errorMessage: '请输入价格' },
@@ -165,6 +169,7 @@ export default {
   },
   onLoad() {
     this.loadCategories()
+    this.fillOperater()
   },
   onReady() {
     this.$refs.form.setRules(this.rules)
@@ -245,18 +250,14 @@ export default {
         text: item.name
       }))
     },
+    fillOperater() {
+      const userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {}
+      this.formData.operater = userInfo.nickname || userInfo.username || ''
+    },
     submit() {
       this.formatPrice()
       this.formatOriginalPrice()
 
-      if (this.formData.remain_count != null) {
-        const remain = parseInt(this.formData.remain_count, 10)
-        if (isNaN(remain)) {
-          uni.showModal({ content: '库存数量必须为整数', showCancel: false })
-          return
-        }
-        this.formData.remain_count = remain
-      }
       if (this.formData.warning_count != null) {
         this.formData.warning_count = parseInt(this.formData.warning_count, 10)
       }

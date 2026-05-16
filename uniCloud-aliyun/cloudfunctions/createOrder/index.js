@@ -94,7 +94,50 @@ exports.main = async (event, context) => {
     // 5. 生成订单号
     const orderNo = 'ORD' + Date.now() + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
 
-    // 6. 组装订单数据
+    // 6. 事务外预计算：每个商品的 FIFO 批次扣减计划和新的生产日期
+    const deductPlans = {};
+    for (const item of selectedItems) {
+      const qty = item.good_count;
+      const batchRes = await db.collection('goods_stock_batch')
+        .where({
+          product_id: item.good_id,
+          remain_qty: dbCmd.gt(0)
+        })
+        .orderBy('production_date', 'asc')
+        .get();
+
+      const batches = batchRes.data || [];
+      if (batches.length === 0) {
+        return { code: 400, message: `商品 ${goodsMap[item.good_id].name} 批次库存不足` };
+      }
+
+      let remaining = qty;
+      const plan = [];
+      for (const batch of batches) {
+        if (remaining <= 0) break;
+        const deduct = Math.min(remaining, batch.remain_qty);
+        remaining -= deduct;
+        plan.push({ _id: batch._id, production_date: batch.production_date, deduct });
+      }
+
+      if (remaining > 0) {
+        return { code: 400, message: `商品 ${goodsMap[item.good_id].name} 批次库存不足` };
+      }
+
+      // 计算扣减后的新生产日期
+      let newCurrentDate = '';
+      for (const batch of batches) {
+        const finalQty = batch.remain_qty - (plan.find(p => p._id === batch._id)?.deduct || 0);
+        if (finalQty > 0) {
+          newCurrentDate = batch.production_date;
+          break;
+        }
+      }
+
+      deductPlans[item.good_id] = { plan, newCurrentDate };
+    }
+
+    // 7. 组装订单数据
     const orderData = {
       order_no: orderNo,
       user_id: userId,
@@ -125,26 +168,40 @@ exports.main = async (event, context) => {
     try {
       const orderRes = await transaction.collection('uni-pay-orders').add(orderData);
 
-      // 8. 原子扣减库存 + 记录流水（事务中）
+      // 8. 原子扣减库存 + FIFO 批次扣减 + 记录流水（事务中，无查询）
       for (const item of selectedItems) {
         const good = goodsMap[item.good_id];
         const newRemain = good.remain_count - item.good_count;
+        const qty = item.good_count;
+        const { plan, newCurrentDate } = deductPlans[item.good_id];
 
+        // 8.1 扣减商品总库存
         await transaction.collection('goods').doc(item.good_id).update({
-          remain_count: dbCmd.inc(-item.good_count),
+          remain_count: dbCmd.inc(-qty),
+          current_production_date: newCurrentDate,
           updated_at: Date.now()
         });
 
+        // 8.2 FIFO 扣减批次库存
+        for (const p of plan) {
+          await transaction.collection('goods_stock_batch').doc(p._id).update({
+            remain_qty: dbCmd.inc(-p.deduct),
+            updated_at: Date.now()
+          });
+        }
+
+        // 8.3 写入流水
         await transaction.collection('stock_flow').add({
           sku: good.sku || '',
           product_id: item.good_id,
           type: 'order',
-          quantity: -item.good_count,
+          quantity: -qty,
           before_count: good.remain_count,
           after_count: newRemain,
           order_id: orderRes.id,
           operator: 'system',
           remark: `订单创建: ${orderNo}`,
+          batch_info: plan,
           created_at: Date.now()
         });
       }

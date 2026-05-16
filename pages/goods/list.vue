@@ -47,7 +47,7 @@
         collection="goods"
         :page-size="20"
         :where="whereCondition"
-        field="name,remain_count,goods_price,original_price,standard,category,goods_thumb,goods_remark,is_hot,is_new,is_on_sale,shelf_life_months"
+        field="name,remain_count,goods_price,original_price,standard,category,goods_thumb,goods_remark,is_hot,is_new,is_on_sale,shelf_life_months,current_production_date"
         @load="onDataLoad"
       >
         <view v-if="error" class="app-error">{{ error.message }}</view>
@@ -79,6 +79,7 @@
                       库存:{{ item.remain_count }}
                       | 分类:{{ getCategoryName(item.category) }}
                       | 保质期:{{ item.shelf_life_months != null ? item.shelf_life_months + '个月' : '-' }}
+                      <text v-if="item.current_production_date"> | 生产日期:{{ item.current_production_date }}</text>
                     </text>
                     <text v-if="item.goods_remark" class="remark app-text-grey">{{ item.goods_remark }}</text>
                     <view class="tags">

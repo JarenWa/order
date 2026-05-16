@@ -7,9 +7,6 @@
       <uni-forms-item name="name" label="名称" required>
         <uni-easyinput placeholder="商品名称" v-model="formData.name" trim="both" />
       </uni-forms-item>
-      <uni-forms-item name="remain_count" label="库存数量" required>
-        <uni-easyinput placeholder="库存数量" type="number" v-model="formData.remain_count" />
-      </uni-forms-item>
       <uni-forms-item name="priceYuan" label="售价(元)" required>
         <uni-easyinput placeholder="请输入价格，如29.90" type="digit" v-model="formData.priceYuan" @blur="formatPrice" />
       </uni-forms-item>
@@ -19,7 +16,7 @@
       <uni-forms-item name="standard" label="商品规格" required>
         <uni-easyinput placeholder="商品规格" v-model="formData.standard" trim="both" />
       </uni-forms-item>
-      <uni-forms-item label="商品类别" name="category">
+      <uni-forms-item label="商品类别" name="category" required>
         <uni-data-select v-model="formData.category" :localdata="categoryOptions" placeholder="请选择商品类别" />
       </uni-forms-item>
       <uni-forms-item name="shelf_life_months" label="保质期(月)">
@@ -77,7 +74,7 @@
         <switch @change="binddata('is_pre', $event.detail.value)" :checked="formData.is_pre" />
       </uni-forms-item>
       <uni-forms-item name="operater" label="操作员">
-        <uni-easyinput placeholder="操作员" v-model="formData.operater" />
+        <uni-easyinput placeholder="操作员" v-model="formData.operater" disabled />
       </uni-forms-item>
 
       <view class="uni-button-group">
@@ -229,6 +226,11 @@ export default {
         text: item.name
       }))
     },
+    fillOperater() {
+      if (this.formData.operater) return
+      const userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {}
+      this.formData.operater = userInfo.nickname || userInfo.username || ''
+    },
     getDetail(id) {
       uni.showLoading({ mask: true })
       db.collection(dbCollectionName)
@@ -258,18 +260,12 @@ export default {
         })
         .finally(() => {
           uni.hideLoading()
+          this.fillOperater()
         })
     },
     submit() {
       this.formatPrice()
       this.formatOriginalPrice()
-      if (this.formData.remain_count !== undefined && this.formData.remain_count !== null) {
-        this.formData.remain_count = parseInt(this.formData.remain_count, 10)
-        if (isNaN(this.formData.remain_count)) {
-          uni.showModal({ content: '库存数量必须为整数', showCancel: false })
-          return
-        }
-      }
       if (this.formData.warning_count != null) {
         this.formData.warning_count = parseInt(this.formData.warning_count, 10)
       }

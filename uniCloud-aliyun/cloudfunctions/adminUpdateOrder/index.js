@@ -116,19 +116,115 @@ exports.main = async (event, context) => {
 
     const scoreEarned = Math.ceil(totalAmount / 100);
 
-    // 4. 使用事务执行写操作
+    // 4. 事务外预计算批次变动计划
+    const batchPlans = {};
+    for (const { goodId, delta } of stockUpdates) {
+      if (delta > 0) {
+        const batchRes = await db.collection('goods_stock_batch')
+          .where({ product_id: goodId })
+          .orderBy('production_date', 'desc')
+          .get();
+        const batches = batchRes.data || [];
+        let remaining = delta;
+        const plan = [];
+        for (const batch of batches) {
+          if (remaining <= 0) break;
+          const space = (batch.initial_qty || 0) - batch.remain_qty;
+          if (space <= 0) continue;
+          const add = Math.min(remaining, space);
+          remaining -= add;
+          plan.push({ _id: batch._id, add });
+        }
+        batchPlans[goodId] = {
+          type: 'add',
+          plan,
+          needCreate: remaining > 0,
+          remain: remaining
+        };
+      } else if (delta < 0) {
+        const deductQty = Math.abs(delta);
+        const batchRes = await db.collection('goods_stock_batch')
+          .where({ product_id: goodId, remain_qty: dbCmd.gt(0) })
+          .orderBy('production_date', 'asc')
+          .get();
+        const batches = batchRes.data || [];
+        let remaining = deductQty;
+        const plan = [];
+        for (const batch of batches) {
+          if (remaining <= 0) break;
+          const d = Math.min(remaining, batch.remain_qty);
+          remaining -= d;
+          plan.push({ _id: batch._id, deduct: d });
+        }
+        if (remaining > 0) {
+          return { code: 400, message: `商品 ${goodsInfoMap[goodId].name} 批次库存不足` };
+        }
+        // 计算新的生产日期
+        let newCurrentDate = '';
+        for (const batch of batches) {
+          const finalQty = batch.remain_qty - (plan.find(p => p._id === batch._id)?.deduct || 0);
+          if (finalQty > 0) {
+            newCurrentDate = batch.production_date;
+            break;
+          }
+        }
+        batchPlans[goodId] = {
+          type: 'deduct',
+          plan,
+          newCurrentDate
+        };
+      }
+    }
+
+    // 5. 使用事务执行写操作（事务内无查询）
     const transaction = await db.startTransaction();
     try {
       for (const { goodId, delta, sku } of stockUpdates) {
         const good = goodsInfoMap[goodId];
         const beforeCount = good.remain_count;
         const afterCount = beforeCount + delta;
+        const plan = batchPlans[goodId];
 
-        await transaction.collection('goods').doc(goodId).update({
+        // 5.1 更新商品总库存
+        const goodsUpdate = {
           remain_count: dbCmd.inc(delta),
           updated_at: Date.now()
-        });
+        };
+        if (plan && plan.newCurrentDate !== undefined) {
+          goodsUpdate.current_production_date = plan.newCurrentDate;
+        }
+        await transaction.collection('goods').doc(goodId).update(goodsUpdate);
 
+        if (delta > 0 && plan) {
+          if (plan.plan && plan.plan.length > 0) {
+            for (const p of plan.plan) {
+              await transaction.collection('goods_stock_batch').doc(p._id).update({
+                remain_qty: dbCmd.inc(p.add),
+                updated_at: Date.now()
+              });
+            }
+          }
+          if (plan.needCreate && plan.remain > 0) {
+            await transaction.collection('goods_stock_batch').add({
+              product_id: goodId,
+              production_date: '',
+              batch_no: 'B' + Date.now().toString(36).toUpperCase(),
+              remain_qty: plan.remain,
+              initial_qty: plan.remain,
+              unit_cost: 0,
+              created_at: Date.now()
+            });
+          }
+        } else if (delta < 0 && plan) {
+          for (const p of plan.plan) {
+            await transaction.collection('goods_stock_batch').doc(p._id).update({
+              remain_qty: dbCmd.inc(-p.deduct),
+              updated_at: Date.now()
+            });
+          }
+        }
+
+        // 5.2 写入流水
         await transaction.collection('stock_flow').add({
           sku: sku || good.sku || '',
           product_id: goodId,
@@ -152,6 +248,25 @@ exports.main = async (event, context) => {
       });
 
       await transaction.commit();
+
+      // 异步更新 current_production_date
+      for (const { goodId } of stockUpdates) {
+        try {
+          const batchRes = await db.collection('goods_stock_batch')
+            .where({ product_id: goodId, remain_qty: dbCmd.gt(0) })
+            .orderBy('production_date', 'asc')
+            .limit(1)
+            .get();
+          const currentDate = (batchRes.data && batchRes.data.length > 0)
+            ? batchRes.data[0].production_date
+            : '';
+          await db.collection('goods').doc(goodId).update({
+            current_production_date: currentDate
+          });
+        } catch (e) {
+          console.warn('更新生产日期失败', goodId, e);
+        }
+      }
 
       return {
         code: 0,

@@ -95,6 +95,14 @@
 			"trim": "both",
 			"maxLength": 100
 		},
+		"current_production_date": {
+			"bsonType": "string",
+			"description": "当前应展示的生产日期（由系统根据批次库存FIFO自动计算）",
+			"title": "当前生产日期",
+			"trim": "both",
+			"pattern": "^\\d{4}-\\d{2}$",
+			"maxLength": 7
+		},
 		"shelf_life_months": {
 			"bsonType": "int",
 			"description": "保质期（月份），用于计算临期预警",
@@ -166,5 +174,5 @@
 			"title": "更新时间"
 		}
 	},
-	"required": ["sku", "name", "standard", "goods_price", "remain_count"]
+	"required": ["sku", "name", "standard", "goods_price", "category"]
 }

@@ -15,6 +15,7 @@
               <text class="app-product-meta">{{ item.standard }}</text>
               <text v-if="item.goods_desc" class="app-product-meta" style="color: #55aaff;">{{ item.goods_desc }}</text>
               <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <text v-if="item.current_production_date" class="app-product-meta">生产日期: {{ item.current_production_date }}</text>
               <view class="app-product-price-row">
                 <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
                 <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
@@ -43,6 +44,7 @@
               <text class="app-product-name">{{ item.name }}</text>
               <text class="app-product-meta">{{ item.standard }}</text>
               <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <text v-if="item.current_production_date" class="app-product-meta">生产日期: {{ item.current_production_date }}</text>
               <view class="app-product-price-row">
                 <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
                 <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
@@ -71,6 +73,7 @@
               <text class="app-product-name">{{ item.name }}</text>
               <text class="app-product-meta">{{ item.standard }}</text>
               <text v-if="item.goods_remark" class="app-product-meta">{{ item.goods_remark }}</text>
+              <text v-if="item.current_production_date" class="app-product-meta">生产日期: {{ item.current_production_date }}</text>
               <view class="app-product-price-row">
                 <text class="app-product-price">¥{{ formatPrice(item.goods_price) }}</text>
                 <text v-if="item.original_price && item.original_price > item.goods_price" class="app-product-original-price">¥{{ formatPrice(item.original_price) }}</text>
@@ -154,7 +157,7 @@ export default {
       try {
         const res = await db.collection('goods')
           .where({ is_pre: true, is_on_sale: true })
-          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count')
+          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count,current_production_date')
           .orderBy('sort_weight', 'desc')
           .limit(10)
           .get();
@@ -170,7 +173,7 @@ export default {
       try {
         const res = await db.collection('goods')
           .where({ is_hot: true, is_on_sale: true, is_pre: false })
-          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count')
+          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count,current_production_date')
           .orderBy('sort_weight', 'desc')
           .limit(10)
           .get();
@@ -186,7 +189,7 @@ export default {
       try {
         const res = await db.collection('goods')
           .where({ is_new: true, is_on_sale: true, is_pre: false })
-          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count')
+          .field('name,standard,goods_desc,goods_remark,goods_price,original_price,goods_thumb,remain_count,current_production_date')
           .orderBy('sort_weight', 'desc')
           .limit(10)
           .get();

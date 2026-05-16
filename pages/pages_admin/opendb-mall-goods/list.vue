@@ -52,7 +52,7 @@
         :page-size="20"
         :key="refreshKey"
         :where="whereCondition"
-        field="sku,name,remain_count,goods_price,original_price,standard,category,goods_thumb,goods_remark,is_hot,is_new,is_on_sale,is_pre,shelf_life_months,warning_count"
+        field="sku,name,remain_count,goods_price,original_price,standard,category,goods_thumb,goods_remark,is_hot,is_new,is_on_sale,is_pre,shelf_life_months,warning_count,current_production_date"
         @load="onDataLoad"
         :manual="true"
       >
@@ -87,6 +87,7 @@
                       | 规格:{{ item.standard }}
                       | 分类:{{ getCategoryName(item.category) }}
                       | 保质期:{{ item.shelf_life_months != null ? item.shelf_life_months + '个月' : '-' }}
+                      <text v-if="item.current_production_date"> | 生产日期:{{ item.current_production_date }}</text>
                     </text>
                     <text v-if="item.goods_remark" class="remark">备注:{{ item.goods_remark }}</text>
                     <view class="tags-row">
@@ -98,8 +99,6 @@
                       </view>
                       <view class="action-btns">
                         <button class="action-btn inbound" size="mini" @click.stop="openFlowDialog(item, 'inbound')">入库</button>
-                        <button class="action-btn check" size="mini" @click.stop="openFlowDialog(item, 'check')">盘点</button>
-                        <button class="action-btn adjust" size="mini" @click.stop="openFlowDialog(item, 'adjust')">调整</button>
                       </view>
                     </view>
                   </view>
@@ -119,7 +118,7 @@
     <uni-popup ref="flowPopup" type="center" :mask-click="false">
       <view class="popup-container">
         <view class="popup-title">
-          {{ flowType === 'inbound' ? '商品入库' : flowType === 'check' ? '库存盘点' : '库存调整' }}
+          商品入库
         </view>
 
         <view class="popup-goods-info">
@@ -129,53 +128,24 @@
         </view>
 
         <!-- 入库表单 -->
-        <block v-if="flowType === 'inbound'">
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label app-popup-form-label-required">入库数量</text>
-            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
-          </view>
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label">生产日期</text>
-            <picker mode="date" fields="month" :value="flowForm.production_date" @change="onFlowDateChange">
-              <view class="app-popup-form-picker">{{ flowForm.production_date || '请选择年月' }}</view>
-            </picker>
-          </view>
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label">成本单价(元)</text>
-            <input class="app-popup-form-input" type="digit" v-model="flowForm.unit_cost_yuan" placeholder="可选" />
-          </view>
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label">批次号</text>
-            <input class="app-popup-form-input" v-model="flowForm.batch_no" placeholder="不填自动生成" />
-          </view>
-        </block>
-
-        <!-- 盘点表单 -->
-        <block v-if="flowType === 'check'">
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label app-popup-form-label-required">实际库存</text>
-            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入实际库存数量" />
-          </view>
-        </block>
-
-        <!-- 调整表单 -->
-        <block v-if="flowType === 'adjust'">
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label app-popup-form-label-required">调整方式</text>
-            <view class="radio-group">
-              <view class="radio-item" :class="{ active: flowForm.adjustType === 'add' }" @click="flowForm.adjustType = 'add'">
-                <text>增加</text>
-              </view>
-              <view class="radio-item" :class="{ active: flowForm.adjustType === 'sub' }" @click="flowForm.adjustType = 'sub'">
-                <text>减少</text>
-              </view>
-            </view>
-          </view>
-          <view class="app-popup-form-item">
-            <text class="app-popup-form-label app-popup-form-label-required">调整数量</text>
-            <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
-          </view>
-        </block>
+        <view class="app-popup-form-item">
+          <text class="app-popup-form-label app-popup-form-label-required">入库数量</text>
+          <input class="app-popup-form-input" type="number" v-model="flowForm.quantity" placeholder="请输入数量" />
+        </view>
+        <view class="app-popup-form-item app-popup-form-label-required">
+          <text class="app-popup-form-label">生产日期</text>
+          <picker mode="date" fields="month" :value="flowForm.production_date" @change="onFlowDateChange">
+            <view class="app-popup-form-picker">{{ flowForm.production_date || '请选择年月' }}</view>
+          </picker>
+        </view>
+        <view class="app-popup-form-item">
+          <text class="app-popup-form-label">成本单价(元)</text>
+          <input class="app-popup-form-input" type="digit" v-model="flowForm.unit_cost_yuan" placeholder="可选" />
+        </view>
+        <view class="app-popup-form-item">
+          <text class="app-popup-form-label">批次号</text>
+          <input class="app-popup-form-input" v-model="flowForm.batch_no" placeholder="不填自动生成" />
+        </view>
 
         <!-- 公共备注 -->
         <view class="app-popup-form-item">
@@ -211,14 +181,13 @@ export default {
       categoryMap: {},
       refreshing: false,
       // 库存操作弹窗数据
-      flowType: '', // 'inbound' | 'check' | 'adjust'
+      flowType: '',
       flowGoods: {},
       flowForm: {
         quantity: '',
         production_date: '',
         unit_cost_yuan: '',
         batch_no: '',
-        adjustType: 'add',
         remark: ''
       }
     };
@@ -383,17 +352,16 @@ export default {
       };
 
       if (this.flowType === 'inbound') {
+        if (!this.flowForm.production_date) {
+          uni.showToast({ title: '请选择生产日期', icon: 'none' });
+          return;
+        }
         payload.quantity = quantity;
-        if (this.flowForm.production_date) payload.production_date = this.flowForm.production_date;
+        payload.production_date = this.flowForm.production_date;
         if (this.flowForm.unit_cost_yuan) {
           payload.unit_cost = Math.round(parseFloat(this.flowForm.unit_cost_yuan) * 100);
         }
         if (this.flowForm.batch_no) payload.batch_no = this.flowForm.batch_no;
-      } else if (this.flowType === 'check') {
-        payload.quantity = quantity;
-      } else if (this.flowType === 'adjust') {
-        const sign = this.flowForm.adjustType === 'sub' ? -1 : 1;
-        payload.quantity = sign * quantity;
       }
 
       uni.showLoading({ title: '处理中...', mask: true });
@@ -497,8 +465,6 @@ export default {
   line-height: 1.6;
 }
 .action-btn.inbound { background-color: #4caf50; }
-.action-btn.check { background-color: #ff9800; }
-.action-btn.adjust { background-color: #2196f3; }
 .popup-container {
   width: 80%;
   max-width: 320px;
@@ -530,24 +496,6 @@ export default {
   color: #666;
   margin-top: 2px;
   display: block;
-}
-.radio-group {
-  flex: 1;
-  display: flex;
-  gap: 10px;
-}
-.radio-item {
-  flex: 1;
-  text-align: center;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.radio-item.active {
-  border-color: #007aff;
-  background: #e6f2ff;
-  color: #007aff;
 }
 .popup-buttons {
   display: flex;
