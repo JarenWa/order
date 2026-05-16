@@ -7,13 +7,14 @@ const bwipjs = require('bwip-js');
 
 // pdfmake 中文字体配置
 // 请将 NotoSansSC 字体文件放到本文件同级的 fonts/ 目录下
+// 换NotoSerifSC
 const FONT_DIR = path.join(__dirname, 'fonts');
 const fonts = {
   NotoSansSC: {
-    normal: path.join(FONT_DIR, 'NotoSansSC-Regular.otf'),
-    bold: path.join(FONT_DIR, 'NotoSansSC-Bold.otf'),
-    italics: path.join(FONT_DIR, 'NotoSansSC-Regular.otf'),
-    bolditalics: path.join(FONT_DIR, 'NotoSansSC-Bold.otf')
+    normal: path.join(FONT_DIR, 'NotoSerifSC-Regular.otf'),
+    bold: path.join(FONT_DIR, 'NotoSerifSC-Bold.otf'),
+    italics: path.join(FONT_DIR, 'NotoSerifSC-Regular.otf'),
+    bolditalics: path.join(FONT_DIR, 'NotoSerifSC-Bold.otf')
   }
 };
 
@@ -51,6 +52,7 @@ async function generateBarcode(text) {
     return null;
   }
 }
+
 /**
  * 格式化价格（分 -> 元）
  * @param {number} price - 价格（单位：分）
@@ -63,10 +65,76 @@ function formatPrice(price, divideBy100 = true) {
   return val.toFixed(2);
 }
 
-// function formatPrice(price) {
-//   if (price === undefined || price === null) return '0.00';
-//   return Number(price).toFixed(2);
-// }
+/**
+ * 金额大写转换
+ * @param {number} price - 价格（单位：分）
+ * @param {boolean} divideBy100 - 是否需要除以100
+ * @returns {string}
+ */
+function amountToChinese(price, divideBy100 = true) {
+  if (price == null || isNaN(price) || price === 0) return '零元整';
+  const val = divideBy100 ? price / 100 : price;
+  const n = Number(val.toFixed(2));
+
+  const fraction = ['角', '分'];
+  const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+  const unit = [
+    ['元', '万', '亿'],
+    ['', '拾', '佰', '仟']
+  ];
+
+  const head = n < 0 ? '欠' : '';
+  const s = Math.abs(n).toFixed(2);
+  const integerPart = s.split('.')[0];
+  const decimalPart = s.split('.')[1] || '00';
+
+  let result = '';
+
+  // 整数部分
+  for (let i = 0; i < integerPart.length; i++) {
+    const d = parseInt(integerPart[i]);
+    const p = integerPart.length - i - 1;
+    const uIdx = p % 4;
+    const gIdx = Math.floor(p / 4);
+
+    if (d === 0) {
+      // 处理零：只在需要的位置显示
+      if (result.length > 0 && result[result.length - 1] !== '零' && uIdx !== 0) {
+        result += digit[d];
+      }
+      if (uIdx === 0 && gIdx > 0) {
+        result += unit[0][gIdx];
+      }
+    } else {
+      result += digit[d] + unit[1][uIdx];
+      if (uIdx === 0 && gIdx > 0) {
+        result += unit[0][gIdx];
+      }
+    }
+  }
+
+  // 清理末尾的零
+  result = result.replace(/零+$/, '');
+  if (!result.endsWith('元') && !result.endsWith('万') && !result.endsWith('亿')) {
+    result += '元';
+  }
+
+  // 小数部分
+  let hasDecimal = false;
+  for (let i = 0; i < 2; i++) {
+    const d = parseInt(decimalPart[i]);
+    if (d !== 0) {
+      result += digit[d] + fraction[i];
+      hasDecimal = true;
+    }
+  }
+
+  if (!hasDecimal) {
+    result += '整';
+  }
+
+  return head + result;
+}
 
 /**
  * 格式化日期时间
@@ -74,138 +142,127 @@ function formatPrice(price, divideBy100 = true) {
  * @param {boolean} withTime - 是否包含时间
  * @returns {string}
  */
+function formatDate(timestamp, withTime = true) {
+  if (!timestamp) return '-';
+  const date = new Date(timestamp);
+  // 强制按北京时间 (UTC+8) 输出，避免服务器时区差异
+  const offset = date.getTimezoneOffset() + 480;
+  const bj = new Date(date.getTime() + offset * 60000);
 
-function formatDate(timestamp , withTime = true) {
-	    if (!timestamp) return '-'
-	    const date = new Date(timestamp)
-	    // 强制按北京时间 (UTC+8) 输出，避免服务器时区差异
-	    const offset = date.getTimezoneOffset() + 480
-	    const bj = new Date(date.getTime() + offset * 60000)
-	    
-		const year = bj.getFullYear()
-	    const month = (bj.getMonth() + 1).toString().padStart(2, '0')
-	    const day = bj.getDate().toString().padStart(2, '0')
+  const year = bj.getFullYear();
+  const month = (bj.getMonth() + 1).toString().padStart(2, '0');
+  const day = bj.getDate().toString().padStart(2, '0');
 
-		if (!withTime) {
-		  return `${year}-${month}-${day}`;
-		}
-	    const hours = bj.getHours().toString().padStart(2, '0')
-	    const minutes = bj.getMinutes().toString().padStart(2, '0')
-	    return `${year}-${month}-${day} ${hours}:${minutes}`
-	  }
-// function formatDate(date) {
-//   if (!date) return '-';
-//   const d = new Date(date);
-//   if (isNaN(d.getTime())) return String(date);
-//   const pad = (n) => String(n).padStart(2, '0');
-//   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-// }
+  if (!withTime) {
+    return `${year}-${month}-${day}`;
+  }
+  const hours = bj.getHours().toString().padStart(2, '0');
+  const minutes = bj.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
 
 function buildFileName(order) {
   const addr = order.user_address || {};
   const street = (addr.street_name || '').replace(/[\\/:*?"<>|]/g, '').substring(0, 12);
   const name = (addr.user_name || '').replace(/[\\/:*?"<>|]/g, '');
   const tel = (addr.mobile || '').replace(/[\\/:*?"<>|]/g, '');
-  
-  //UTC
-  const date = new Date()
+
+  // UTC
+  const date = new Date();
   // 强制按北京时间 (UTC+8) 输出，避免服务器时区差异
-  const offset = date.getTimezoneOffset() + 480
-  const now= new Date(date.getTime() + offset * 60000)
-  
-  const timeStr =  `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}--${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}`
+  const offset = date.getTimezoneOffset() + 480;
+  const now = new Date(date.getTime() + offset * 60000);
+
+  const timeStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}--${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}`;
   return `${street}-${name}-${tel}-${timeStr}`;
 }
 
-function getStatusText(order) {
-  let text = STATUS_MAP[order.status] || '未知';
-  if (order.status === 3 && order.admin_cancelled) text = '(后台)已取消';
-  if (order.status === 2 && order.admin_completed) text = '(后台)已收货';
-  return text;
-}
+
 
 async function buildPdfDefinition(order) {
   const addr = order.user_address || {};
   const goodsList = order.goods_list || [];
   const totalCount = goodsList.reduce((sum, g) => sum + (g.count || 0), 0);
 
-  const barcodePromises = goodsList.map(g => generateBarcode(g.sku));
-  const barcodes = await Promise.all(barcodePromises);
-
   const tableBody = [
     [
-      { text: '条形码', style: 'tableHeader', alignment: 'center' },
-      { text: '商品名称', style: 'tableHeader' },
+		{ text: '行号' , style: 'tableHeader', alignment: 'center'},
+      { text: '条码', style: 'tableHeader', alignment: 'center' },
+      { text: '商品名称', style: 'tableHeader', alignment: 'center' },
+	  { text: '数量', style: 'tableHeader', alignment: 'center' },
       { text: '规格', style: 'tableHeader', alignment: 'center' },
-      { text: '单价', style: 'tableHeader', alignment: 'right' },
-      { text: '数量', style: 'tableHeader', alignment: 'center' },
-      { text: '小计', style: 'tableHeader', alignment: 'right' },
+      { text: '单价', style: 'tableHeader', alignment: 'center' },
+      { text: '金额', style: 'tableHeader', alignment: 'center' },
+	  { text: '备注', style: 'tableHeader', alignment: 'center'},
     ]
   ];
 
   goodsList.forEach((good, idx) => {
-    const barcodeImg = barcodes[idx];
+   
     tableBody.push([
-      barcodeImg 
-        ? { image: barcodeImg, width: 70, alignment: 'center', margin: [0, 2, 0, 2] }
-        : { text: good.sku || '-', alignment: 'center', fontSize: 9, color: '#999' },
-      { text: good.name || '', fontSize: 10 },
-      { text: good.standard || '-', alignment: 'center', fontSize: 10 },
-      { text: '¥' + formatPrice(good.price), alignment: 'right', fontSize: 10 },
-      { text: String(good.count || 0), alignment: 'center', fontSize: 10 },
-      { text: '¥' + formatPrice(good.total), alignment: 'right', fontSize: 10, bold: true },
+      
+       { text: String(idx + 1), alignment: 'center', fontSize: 10 },
+      { text: good.sku || '-', alignment: 'center', fontSize: 9},
+      { text: good.name || '', fontSize: 9, alignment: 'center' },
+	   { text: String(good.count || 0), alignment: 'center', fontSize: 10 },
+      { text: good.standard || '-', alignment: 'center', fontSize: 9 },
+      { text: '¥' + formatPrice(good.price), alignment: 'center', fontSize: 10 }, 
+      { text: '¥' + formatPrice(good.total), alignment: 'center', fontSize: 10, bold: true },
+	  {}
     ]);
   });
 
   return {
-    pageSize: 'A4',
-    pageMargins: [40, 40, 40, 40],
+    pageSize: { width: 683, height: 264 },  // 241×93mm
+    pageMargins: [36, 4, 36, 14],   // 边距  依次 左 上 右 下  下面页脚显示页码  票据纸张左右有空 
     defaultStyle: { font: 'NotoSansSC', fontSize: 10, color: '#333' },
     styles: {
-      title: { fontSize: 18, bold: true, alignment: 'center', color: '#333', margin: [0, 0, 0, 16] },
-      sectionTitle: { fontSize: 12, bold: true, color: '#333', margin: [0, 12, 0, 8], borderLeft: [3, 0, 0, '#007aff'], paddingLeft: 8 },
-      tableHeader: { fontSize: 10, bold: true, color: '#333', fillColor: '#f5f5f5' },
+      title: { fontSize: 11, bold: true, alignment: 'center', color: '#333', margin: [0, 0, 0, 0] },
+      sectionTitle: { fontSize: 10, bold: true, color: '#333', margin: [0, 0, 0, 0], borderLeft: [0, 0, 0, '#007aff'], paddingLeft: 0 },
+      tableHeader: { fontSize: 10, bold: true, color: '#333', fillColor: '#f5f5f5', alignment: 'center' },
       infoLabel: { color: '#888', fontSize: 10 },
-      summaryTotal: { fontSize: 13, bold: true, color: '#ff6000' },
-      footer: { fontSize: 9, color: '#999', alignment: 'right', margin: [0, 20, 0, 0] }
+      summaryTotal: { fontSize: 10, bold: true, color: '#333' },
+      footer: { fontSize: 9, color: '#333'}
+    },
+  
+    footer: function (currentPage, pageCount) {
+      return {
+        margin: [36, 0, 36, 0],  // ← 加这里，与 pageMargins 左右一致
+        columns: [
+          {
+            text: `开江县建鸿副食店销售单  ·  联系电话：15328949176`,
+            alignment: 'left',
+			 fontSize: 9, color: '#333'
+          },
+          {
+            text: `出单时间：${formatDate(Date.now())}  ·  第 ${currentPage} 页 / 共 ${pageCount} 页`,
+            alignment: 'right',
+			 fontSize: 9, color: '#333'
+          }
+        ]
+      };
     },
     content: [
-      { text: buildFileName(order), style: 'title' },
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#333' }] },
-      { text: '订单信息', style: 'sectionTitle' },
+      { text: '开江县建鸿副食店销售单', style: 'title' },
       {
         columns: [
-          { text: `订单号：${order.order_no || '-'}`, width: '50%', fontSize: 10 },
-          { text: `创建时间：${formatDate(order.create_date)}`, width: '50%', fontSize: 10 }
-        ],
-        margin: [0, 0, 0, 4]
-      },
-      {
-        columns: [
-          { text: `状态：${getStatusText(order)}`, width: '50%', fontSize: 10 },
-          { text: order.is_pre_order ? '类型：预售订单' : '', width: '50%', fontSize: 10 }
-        ],
-        margin: [0, 0, 0, 8]
-      },
-      { text: '收货信息', style: 'sectionTitle' },
-      {
-        columns: [
-          { text: [{ text: '收货人/单位：', style: 'infoLabel' }, addr.user_name || '-'], width: '50%', fontSize: 10 },
-          { text: [{ text: '电话：', style: 'infoLabel' }, addr.mobile || '-'], width: '50%', fontSize: 10 }
-        ],
-        margin: [0, 0, 0, 4]
-      },
-      {
-        text: [{ text: '地址：', style: 'infoLabel' }, addr.formatted_address || '-'],
-        margin: [0, 0, 0, 4]
-      },
-      ...(addr.alias ? [{ text: [{ text: '地址别名：', style: 'infoLabel' }, addr.alias], margin: [0, 0, 0, 4] }] : []),
-      ...(order.remark ? [{ text: [{ text: '备注：', style: 'infoLabel' }, order.remark], margin: [0, 0, 0, 8] }] : [{ text: '', margin: [0, 0, 0, 8] }]),
-      { text: '商品清单', style: 'sectionTitle' },
+			{ text: `收货人/单位：${addr.user_name || '-'}`, fontSize: 10},
+			{ text: `电话：${addr.mobile || '-'}`, width: '20%', fontSize: 10 },	
+			{ text: `客户备注：${ order.remark || '-'}`,fontSize: 10}, 
+			{ text: `创建时间：${ formatDate(order.create_date)}`,fontSize: 10, alignment: 'right' },
+		   ],
+		},
+		{
+		  columns: [
+			  { text: `地址：${ addr.formatted_address || '-'}`,fontSize: 10},
+			  ...(addr.alias ? [{ text: [ { text: `地址别名：${ addr.alias }` , fontSize: 10}]  }] : []),
+			 	{ text: `订单编号：${ order.order_no || '-'}`, fontSize: 10, alignment: 'right' },
+			  ],
+		},
       {
         table: {
           headerRows: 1,
-          widths: [80, '*', 70, 60, 50, 60],
+          widths: [25, 80, '*', 30, 70, 60, 60, 50],
           body: tableBody
         },
         layout: {
@@ -213,29 +270,24 @@ async function buildPdfDefinition(order) {
           vLineWidth: () => 0.5,
           hLineColor: (i, node) => (i === 0 || i === 1 || i === node.table.body.length) ? '#ddd' : '#eee',
           vLineColor: () => '#ddd',
-          paddingLeft: () => 4,
-          paddingRight: () => 4,
-          paddingTop: () => 6,
-          paddingBottom: () => 6,
+          paddingLeft: () => 0,
+          paddingRight: () => 0,
+          paddingTop: () => 0,
+          paddingBottom: () => 0,
         }
       },
-      {
-        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1.5, lineColor: '#333' }],
-        margin: [0, 16, 0, 12]
-      },
+      
       {
         columns: [
-          { text: `商品件数：${totalCount} 件`, fontSize: 11 },
-          { text: `合计金额：¥${formatPrice(order.total_amount)}`, style: 'summaryTotal', alignment: 'right' }
+			{ text: `签收人：`, fontSize: 10, width: '15%', bold: true},
+			{ text: `商品总数：${totalCount} `, fontSize: 9, width: '12%'},
+			{ text: `获得积分：${formatPrice(order.score_earned)}`, fontSize: 9, width: '12%'},
+          { text: `本单总计小写：¥${formatPrice(order.total_amount)}`, style: 'summaryTotal'},
+          { text: `本单总计大写：${amountToChinese(order.total_amount)}`, style: 'summaryTotal', alignment: 'right' }
         ],
-        margin: [0, 0, 0, 6]
+        margin: [0, 0, 0, 0]
       },
-      {
-        text: `获得积分：${formatPrice(order.score_earned)}`,
-        fontSize: 11,
-        margin: [0, 0, 0, 8]
-      },
-      { text: `打印时间：${formatDate(Date.now())}`, style: 'footer' }
+      
     ]
   };
 }
@@ -307,7 +359,7 @@ exports.main = async (event, context) => {
     const uploadRes = await uniCloud.uploadFile({
       cloudPath: `order-pdfs/${fileName}`,
       fileContent: pdfBuffer,
-	  cloudPathAsRealPath:true,
+      cloudPathAsRealPath: true,
     });
 
     const fileID = uploadRes.fileID;
