@@ -100,7 +100,7 @@
           </view>
           <view class="app-popup-form-item">
             <text class="app-popup-form-label">生产日期</text>
-            <picker mode="date" @change="onInboundDateChange">
+            <picker mode="date"fields="month" @change="onInboundDateChange">
               <view class="app-popup-form-picker">{{ inboundForm.production_date || '请选择生产日期' }}</view>
             </picker>
           </view>
