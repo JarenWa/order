@@ -3,10 +3,17 @@ const db = uniCloud.database();
 const dbCmd = db.command;
 
 exports.main = async (event, context) => {
-  const { addressId,orderId, goodsList } = event;
+  const { addressId, orderId, goodsList } = event;
   if (!orderId || !Array.isArray(goodsList)) {
     return { code: 400, message: '参数错误' };
   }
+
+  // 统一将 count 和 price 转为数字，防止客户端传字符串
+  const normalizedGoodsList = goodsList.map(item => ({
+    ...item,
+    count: Number(item.count) || 0,
+    price: Number(item.price) || 0,
+  }));
 
   try {
     // 1. 获取原订单（事务外）
@@ -20,7 +27,7 @@ exports.main = async (event, context) => {
     }
 
     // 2. 过滤掉数量 <= 0 的商品（视为删除）
-    const validGoodsList = goodsList.filter(item => item.count > 0);
+    const validGoodsList = normalizedGoodsList.filter(item => item.count > 0);
     if (validGoodsList.length === 0) {
       return { code: 400, message: '订单至少保留一个商品' };
     }
@@ -64,8 +71,8 @@ exports.main = async (event, context) => {
         return { code: 400, message: `商品 ${name} 已不存在，无法修改` };
       }
 
-      const oldCount = oldItem ? oldItem.count : 0;
-      const newCount = newItem ? newItem.count : 0;
+      const oldCount = Number(oldItem ? oldItem.count : 0);
+      const newCount = Number(newItem ? newItem.count : 0);
 
       if (oldCount === newCount) {
         // 数量未变，保留原商品信息（如果存在且新数量 > 0）
@@ -109,7 +116,7 @@ exports.main = async (event, context) => {
           price: newItem.price,
           original_price: base.original_price || 0,
           count: newCount,
-          total: newItem.price * newCount,
+          total: Number(newItem.price) * newCount,
           image: base.image || '',
         });
       }
@@ -119,7 +126,7 @@ exports.main = async (event, context) => {
     // 4. 重新计算订单总金额和积分
     let totalAmount = 0;
     finalGoodsList.forEach(item => {
-      totalAmount += item.total;
+      totalAmount += Number(item.total) || 0;
     });
     const scoreEarned = Math.ceil(totalAmount / 100);
 

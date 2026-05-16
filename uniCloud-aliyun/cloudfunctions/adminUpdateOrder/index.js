@@ -15,6 +15,13 @@ exports.main = async (event, context) => {
   if (!orderId || !Array.isArray(goodsList)) {
     return { code: 400, message: '参数错误' };
   }
+  
+  // 统一将 count 和 price 转为数字，防止客户端传字符串
+  const normalizedGoodsList = goodsList.map(item => ({
+    ...item,
+    count: Number(item.count) || 0,
+    price: Number(item.price) || 0,
+  }));
 
   try {
     // 1. 获取原订单（事务外）
@@ -35,7 +42,7 @@ exports.main = async (event, context) => {
     });
 
     const newGoodsMap = {};
-    goodsList.forEach(item => {
+    normalizedGoodsList.forEach(item => {
       newGoodsMap[item.good_id] = item;
     });
 
@@ -53,9 +60,11 @@ exports.main = async (event, context) => {
     for (const goodId of goodsIds) {
       const oldItem = oldGoodsMap[goodId];
       const newItem = newGoodsMap[goodId];
+	  
+	  const oldCount = Number(oldItem ? oldItem.count : 0);
+	  const newCount = Number(newItem ? newItem.count : 0);
 
-      const oldCount = oldItem ? oldItem.count : 0;
-      const newCount = newItem ? newItem.count : 0;
+      
 
       if (oldCount === newCount) continue;
 
@@ -86,18 +95,20 @@ exports.main = async (event, context) => {
 
     // 3. 重新计算订单总金额和积分
     let totalAmount = 0;
-    const newGoodsList = goodsList.map(item => {
+    const newGoodsList = normalizedGoodsList.map(item => {
       const good = order.goods_list.find(g => g.good_id === item.good_id) || {};
-      const total = item.price * item.count;
+      const count = Number(item.count) || 0;
+      const price = Number(item.price) || 0;
+      const total = price * count;
       totalAmount += total;
       return {
         good_id: item.good_id,
         sku: good.sku || '',
         name: good.name || '未知商品',
         standard: good.standard || '',
-        price: item.price,
+        price: price,
         original_price: good.original_price || 0,
-        count: item.count,
+        count: count,
         total: total,
         image: good.image || '',
       };
